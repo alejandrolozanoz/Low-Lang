@@ -1,0 +1,13 @@
+programa low;
+var
+  int i;
+
+funcion int fact ()
+var int i;
+{
+  regresa(j);
+}
+
+principal() {
+  j=p*2;
+} 

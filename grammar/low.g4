@@ -2,6 +2,10 @@
 
 grammar low;
 
+@header {
+  from compiler import Compiler
+  compiler = Compiler()
+}
 
 /* ---TOKENS--- */
 
@@ -59,7 +63,7 @@ BOOL: 'bool';
 //Constants
 STRING_CONSTANT: '"' .*? '"';
 CHAR_CONSTANT: [.];
-INTEGER_CONSTANT: [0-9]+;
+INT_CONSTANT: [0-9]+;
 FLOAT_CONSTANT: [0-9]+.[0-9]+;
 BOOL_CONSTANT: 'true' | 'false';
 VAR_NAME: [_A-Za-z]([_A-Za-z0-9])*;
@@ -83,23 +87,23 @@ variables:
 ;
 
 var_types:
-  INT |
-  BOOL |
-  FLOAT |
-  STRING |
-  CHAR
+  INT {compiler.add_type($INT.text)} |
+  BOOL {compiler.add_type($BOOL.text)} |
+  FLOAT {compiler.add_type($FLOAT.text)} |
+  STRING {compiler.add_type($STRING.text)} |
+  CHAR {compiler.add_type($CHAR.text)}
 ;
 
 constant:
-  BOOL_CONSTANT |
-  FLOAT_CONSTANT |
-  INTEGER_CONSTANT |
-  CHAR_CONSTANT |
-  STRING_CONSTANT
+  BOOL_CONSTANT {compiler.add_operand($BOOL_CONSTANT.text)} |
+  FLOAT_CONSTANT {compiler.add_operand($FLOAT_CONSTANT.text)} |
+  INT_CONSTANT {compiler.add_operand($INT_CONSTANT.text)} |
+  CHAR_CONSTANT {compiler.add_operand($CHAR_CONSTANT.text)} |
+  STRING_CONSTANT {compiler.add_operand($STRING_CONSTANT.text)}
 ;
 
 varindividual:
-  VAR_NAME (LEFT_BRACKET INTEGER_CONSTANT? RIGHT_BRACKET)?
+  VAR_NAME (LEFT_BRACKET INT_CONSTANT? RIGHT_BRACKET)?
 ;
 
 function_declaration:
@@ -119,24 +123,29 @@ expresions:
 ;
 
 multiple_expresions:
-  expresion_comparison ((AND | OR) expresion_comparison)*
+  expresion_comparison ((AND {compiler.add_operator($AND.text)} | OR {compiler.add_operator($OR.text)}) expresion_comparison)*
 ;
 
 expresion_comparison:
-  expresion ((GREATER | LESS | GREATER_OR_EQUAL | LESS_OR_EQUAL | NOT_EQUAL | EQUAL) expresion)?
+  expresion ((GREATER {compiler.add_operator($GREATER.text)} |
+    LESS {compiler.add_operator($LESS.text)} |
+    GREATER_OR_EQUAL {compiler.add_operator($GREATER_OR_EQUAL.text)} |
+    LESS_OR_EQUAL {compiler.add_operator($LESS_OR_EQUAL.text)} |
+    NOT_EQUAL {compiler.add_operator($NOT_EQUAL.text)} |
+    EQUAL {compiler.add_operator($EQUAL.text)}) expresion)?
 ;
 
 expresion:
-  term ((ADDITION | SUBTRACTION) term)*
+  term ((ADDITION {compiler.add_operator($ADDITION.text)} | SUBTRACTION {compiler.add_operator($SUBTRACTION.text)}) term)*
 ;
 
 term:
-  factor ((MULTIPLICATION | DIVISION) factor)*
+  factor ((MULTIPLICATION {compiler.add_operator($MULTIPLICATION.text)} | DIVISION {compiler.add_operator($DIVISION.text)}) factor)*
 ;
 
 factor:
-  LEFT_PARENTHESIS expresions RIGHT_PARENTHESIS |
-  VAR_NAME LEFT_PARENTHESIS ( multiple_expresions (COMMA multiple_expresions)* )? RIGHT_PARENTHESIS |
+  LEFT_PARENTHESIS {compiler.add_parenthesis()} expresions RIGHT_PARENTHESIS {compiler.remove_parenthesis()} |
+  VAR_NAME LEFT_PARENTHESIS {compiler.add_parenthesis()} ( multiple_expresions (COMMA multiple_expresions)* )? RIGHT_PARENTHESIS {compiler.remove_parenthesis()} |
   indexvariable |
   constant
 ;
@@ -161,7 +170,7 @@ voidcall:
 ;
 
 returncall:
-  RETURN LEFT_PARENTHESIS expresions RIGHT_PARENTHESIS SEMICOLON
+  RETURN LEFT_PARENTHESIS {compiler.add_parenthesis()} expresions RIGHT_PARENTHESIS SEMICOLON
 ;
 
 indexvariable:

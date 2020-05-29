@@ -17,7 +17,7 @@ $ alias grun='java org.antlr.v4.gui.TestRig'
 You should also install ANTLR4 python runtime in PIP:
 
 ```bash
-pip install antlr4-python3-runtime
+$ pip install antlr4-python3-runtime
 ```
 
 ## Development

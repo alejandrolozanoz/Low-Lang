@@ -23,7 +23,7 @@ class Types:
     ERROR = "error"
 
 class SemanticCube: 
-	operations_cube = {
+	semantic_cube = {
 		# INT
 		(Types.INT, Types.INT, Operations.ADDITION): Types.INT,
 		(Types.INT, Types.INT, Operations.SUBTRACTION): Types.INT,

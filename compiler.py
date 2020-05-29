@@ -1,14 +1,12 @@
 from antlr4 import *
 from function import Function
 from variable import Variable
-from functions_table import FunctionsTable
-from variables_table import VariablesTable
 from semantic_cube import SemanticCube
 
 class Compiler:
     def __init__(self):
-        self.functions_table = FunctionsTable
-        self.variables_table = VariablesTable
+        self.functions_table = []
+        self.variables_table = []
         self.quadruples = []
         self.operators_stack = []
         self.operands_stack = []
@@ -17,22 +15,29 @@ class Compiler:
         self.semantic_cube = SemanticCube()
         
     def add_function(self, function: Function):
-        self.function_table.append(function)
+        self.functions_table.append(function)
+        print(function)
 
     def add_variable(self, variable: Variable):
-        self.variable_table.append(variable)
+        self.variables_table.append(variable)
+        print(variable)
 
     def add_operator(self, operator):
-        self.operatorStack.append(operator)
+        self.operators_stack.append(operator)
+        print(operator)
 
     def add_type(self, type):
-        self.typesStack.append(type)
-]
+        self.types_stack.append(type)
+        print(type)
+
     def add_operand(self, operand):
-        self.operandStack.append(operand)
+        self.operands_stack.append(operand)
+        print(operand)
 
     def add_parenthesis(self):
-        self.operatorStack.append('(')
+        self.operators_stack.append('(')
+        print('(')
 
     def remove_parenthesis(self):
-        self.operatorStack.pop()
+        self.operators_stack.pop()
+        print(')')

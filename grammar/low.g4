@@ -3,8 +3,8 @@
 grammar low;
 
 @header {
-  from compiler import Compiler
-  compiler = Compiler()
+from compiler import Compiler
+compiler = Compiler()
 }
 
 /* ---TOKENS--- */
@@ -170,7 +170,7 @@ voidcall:
 ;
 
 returncall:
-  RETURN LEFT_PARENTHESIS {compiler.add_parenthesis()} expresions RIGHT_PARENTHESIS SEMICOLON
+  RETURN LEFT_PARENTHESIS expresions RIGHT_PARENTHESIS SEMICOLON
 ;
 
 indexvariable:

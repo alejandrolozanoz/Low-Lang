@@ -1,8 +1,12 @@
-# Generated from grammar/low.g4 by ANTLR 4.8
+# Generated from Grammar/low.g4 by ANTLR 4.8
 from antlr4 import *
 from io import StringIO
 from typing.io import TextIO
 import sys
+
+
+from compiler import Compiler
+compiler = Compiler()
 
 
 
@@ -214,7 +218,7 @@ class lowLexer(Lexer):
     BOOL = 43
     STRING_CONSTANT = 44
     CHAR_CONSTANT = 45
-    INTEGER_CONSTANT = 46
+    INT_CONSTANT = 46
     FLOAT_CONSTANT = 47
     BOOL_CONSTANT = 48
     VAR_NAME = 49
@@ -242,7 +246,7 @@ class lowLexer(Lexer):
             "SEMICOLON", "LESS", "GREATER", "LESS_OR_EQUAL", "GREATER_OR_EQUAL", 
             "EQUAL", "NOT_EQUAL", "ASSIGN", "AND", "OR", "ADDITION", "SUBTRACTION", 
             "MULTIPLICATION", "DIVISION", "VAR", "STRING", "CHAR", "INT", 
-            "FLOAT", "BOOL", "STRING_CONSTANT", "CHAR_CONSTANT", "INTEGER_CONSTANT", 
+            "FLOAT", "BOOL", "STRING_CONSTANT", "CHAR_CONSTANT", "INT_CONSTANT", 
             "FLOAT_CONSTANT", "BOOL_CONSTANT", "VAR_NAME", "COMMENT_BLOCK", 
             "COMMENT_LINE", "WHITESPACE" ]
 
@@ -254,9 +258,8 @@ class lowLexer(Lexer):
                   "GREATER_OR_EQUAL", "EQUAL", "NOT_EQUAL", "ASSIGN", "AND", 
                   "OR", "ADDITION", "SUBTRACTION", "MULTIPLICATION", "DIVISION", 
                   "VAR", "STRING", "CHAR", "INT", "FLOAT", "BOOL", "STRING_CONSTANT", 
-                  "CHAR_CONSTANT", "INTEGER_CONSTANT", "FLOAT_CONSTANT", 
-                  "BOOL_CONSTANT", "VAR_NAME", "COMMENT_BLOCK", "COMMENT_LINE", 
-                  "WHITESPACE" ]
+                  "CHAR_CONSTANT", "INT_CONSTANT", "FLOAT_CONSTANT", "BOOL_CONSTANT", 
+                  "VAR_NAME", "COMMENT_BLOCK", "COMMENT_LINE", "WHITESPACE" ]
 
     grammarFileName = "low.g4"
 

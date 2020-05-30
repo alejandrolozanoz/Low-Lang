@@ -3,7 +3,7 @@ var
     int i, j, p;
     int Arreglo[];
     int Arreglo [], OtroArreglo[10];
-    float valor;--
+    float valor;
 
 funcion int fact (int j)
 var int i;

@@ -3,7 +3,7 @@
 grammar low;
 
 @header {
-from compiler import Compiler
+from compiler.compiler import Compiler
 compiler = Compiler()
 }
 
@@ -127,7 +127,7 @@ multiple_expresions:
 ;
 
 expresion_comparison:
-  expresion ((GREATER {compiler.add_operator($GREATER.text)} |
+  expresion {compiler.add_operator($GREATER.text)} ((GREATER {compiler.add_operator($GREATER.text)} |
     LESS {compiler.add_operator($LESS.text)} |
     GREATER_OR_EQUAL {compiler.add_operator($GREATER_OR_EQUAL.text)} |
     LESS_OR_EQUAL {compiler.add_operator($LESS_OR_EQUAL.text)} |
@@ -136,16 +136,16 @@ expresion_comparison:
 ;
 
 expresion:
-  term ((ADDITION {compiler.add_operator($ADDITION.text)} | SUBTRACTION {compiler.add_operator($SUBTRACTION.text)}) term)*
+  term {compiler.check_for_add_or_subs()} ((ADDITION {compiler.add_operator($ADDITION.text)} | SUBTRACTION {compiler.add_operator($SUBTRACTION.text)}) term)*
 ;
 
 term:
-  factor ((MULTIPLICATION {compiler.add_operator($MULTIPLICATION.text)} | DIVISION {compiler.add_operator($DIVISION.text)}) factor)*
+  factor {compiler.check_for_mult_or_div()} ((MULTIPLICATION {compiler.add_operator($MULTIPLICATION.text)} | DIVISION {compiler.add_operator($DIVISION.text)}) factor)*
 ;
 
 factor:
-  LEFT_PARENTHESIS {compiler.add_parenthesis()} expresions RIGHT_PARENTHESIS {compiler.remove_parenthesis()} |
-  VAR_NAME LEFT_PARENTHESIS {compiler.add_parenthesis()} ( multiple_expresions (COMMA multiple_expresions)* )? RIGHT_PARENTHESIS {compiler.remove_parenthesis()} |
+  LEFT_PARENTHESIS {compiler.left_parenthesis()} expresions RIGHT_PARENTHESIS {compiler.right_parenthesis()} |
+  VAR_NAME LEFT_PARENTHESIS {compiler.left_parenthesis()} ( multiple_expresions (COMMA multiple_expresions)* )? RIGHT_PARENTHESIS {compiler.right_parenthesis()} |
   indexvariable |
   constant
 ;

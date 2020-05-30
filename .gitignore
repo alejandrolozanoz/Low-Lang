@@ -1,4 +1,5 @@
 .DS_Store
 grammar/.antlr
 grammar/__pycache__
+semantics/__pycache__
 __pycache__

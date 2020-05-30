@@ -10,4 +10,4 @@ var int i;
 
 principal() {
   j=p*2;
-} 
+}

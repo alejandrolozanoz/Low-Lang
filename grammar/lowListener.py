@@ -1,11 +1,11 @@
-# Generated from Grammar/low.g4 by ANTLR 4.8
+# Generated from grammar/low.g4 by ANTLR 4.8
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .lowParser import lowParser
 else:
     from lowParser import lowParser
 
-from compiler import Compiler
+from compiler.compiler import Compiler
 compiler = Compiler()
 
 

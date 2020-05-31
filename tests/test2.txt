@@ -2,13 +2,13 @@ programa low;
 var
     int i, j, p;
     int Arreglo[];
-    int Arreglo [], OtroArreglo[10];
+    int Arreglo1[], OtroArreglo[10];
     float valor;
 
 funcion int fact (int j)
 var int i;
 {
-    i = j = (p - j * 2 = j);
+    j = (p - j * 2);
 
     si (j == 1) entonces {
         regresa (j);

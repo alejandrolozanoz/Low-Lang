@@ -1,25 +1,20 @@
 from antlr4 import *
-from function import Function
-from variable import Variable
+from compiler.function import Function
+from compiler.variable import Variable
 
 class FunctionsTable:
 	def __init__(self):
 		self.functions = {}
 
-	def add_function(self, function_type, function_name, function_parameters):
-		if function_name in self.functions:
-			raise Exception("{} was already defined in the functions table".format(function_name))
-
+	def add_function(self, function: Function):
+		if function.function_name not in self.functions:
+			self.functions[function.function_name] = function
 		else:
-			self.functions[function_name] = Function(function_name, function_type, {})
-			self.functions[function_name].function_parameters = function_parameters
-			for i in range(len(function_parameters)):
-				self.functions[function_name].function_parameters[i] = Variable(
-					function_parameters[i].type, function_parameters[i].name, function_parameters[i].value)
+			print('La función ' + str(function.name) + ' ya estaba declarada.')
 
 	def get_function(self, function_name):
 		if function_name not in self.functions:
-			raise Exception("{} doesn't exist in the functions table.".format(function_name))
+			print(str(function_name) + ' no existe en la tabla de funciones.')
 
 		else:
 			return self.functions[function_name]

@@ -6,6 +6,7 @@ else:
     from lowParser import lowParser
 
 from compiler.compiler import Compiler
+from compiler.function import Function
 compiler = Compiler()
 
 
@@ -39,6 +40,15 @@ class lowListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by lowParser#declaration_array_brackets.
+    def enterDeclaration_array_brackets(self, ctx:lowParser.Declaration_array_bracketsContext):
+        pass
+
+    # Exit a parse tree produced by lowParser#declaration_array_brackets.
+    def exitDeclaration_array_brackets(self, ctx:lowParser.Declaration_array_bracketsContext):
+        pass
+
+
     # Enter a parse tree produced by lowParser#data_type.
     def enterData_type(self, ctx:lowParser.Data_typeContext):
         pass
@@ -57,15 +67,6 @@ class lowListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by lowParser#initialized_variable.
-    def enterInitialized_variable(self, ctx:lowParser.Initialized_variableContext):
-        pass
-
-    # Exit a parse tree produced by lowParser#initialized_variable.
-    def exitInitialized_variable(self, ctx:lowParser.Initialized_variableContext):
-        pass
-
-
     # Enter a parse tree produced by lowParser#functions.
     def enterFunctions(self, ctx:lowParser.FunctionsContext):
         pass
@@ -81,6 +82,15 @@ class lowListener(ParseTreeListener):
 
     # Exit a parse tree produced by lowParser#function.
     def exitFunction(self, ctx:lowParser.FunctionContext):
+        pass
+
+
+    # Enter a parse tree produced by lowParser#function_type.
+    def enterFunction_type(self, ctx:lowParser.Function_typeContext):
+        pass
+
+    # Exit a parse tree produced by lowParser#function_type.
+    def exitFunction_type(self, ctx:lowParser.Function_typeContext):
         pass
 
 
@@ -138,12 +148,12 @@ class lowListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by lowParser#variable.
-    def enterVariable(self, ctx:lowParser.VariableContext):
+    # Enter a parse tree produced by lowParser#array_brackets.
+    def enterArray_brackets(self, ctx:lowParser.Array_bracketsContext):
         pass
 
-    # Exit a parse tree produced by lowParser#variable.
-    def exitVariable(self, ctx:lowParser.VariableContext):
+    # Exit a parse tree produced by lowParser#array_brackets.
+    def exitArray_brackets(self, ctx:lowParser.Array_bracketsContext):
         pass
 
 

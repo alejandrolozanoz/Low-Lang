@@ -7,7 +7,7 @@ class VariablesTable:
 
 	def add_variable(self, variable_type, variable_name, variable_value):
 		if variable_name in self.variables:
-			raise Exception("{} was already defined in the variables table".format(variable_name))
+			print(str(variable_name) + ' ya estaba definida en la tabla de variables.')
 
 		else:
 			var = Variable(variable_type, variable_name, variable_value)
@@ -15,7 +15,7 @@ class VariablesTable:
 
 	def get_variable(self, variable_name):
 		if variable_name not in self.variables:
-			raise Exception("{} doesn't exist in the variables table.".format(variable_name))
+			print(str(variable_name) + ' no existe en la tabla de variables.')
 		        
 		else:
 			return self.variables[variable_name]

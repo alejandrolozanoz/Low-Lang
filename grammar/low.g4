@@ -4,6 +4,7 @@ grammar low;
 
 @header {
 from compiler.compiler import Compiler
+from compiler.function import Function
 compiler = Compiler()
 }
 
@@ -62,11 +63,11 @@ DIVISION: '/';
 
 //Constants
 STRING_CONSTANT: '"' .*? '"';
-CHAR_CONSTANT: [A-Za-z];
+CHAR_CONSTANT: [.];
 INT_CONSTANT: [0-9]+;
 FLOAT_CONSTANT: [0-9]+.[0-9]+;
 BOOL_CONSTANT: 'true' | 'false';
-ID: [A-Za-z]([_A-Za-z0-9])*;
+ID: [_A-Za-z]([_A-Za-z0-9])*;
 
 // Whitespace and comments
 COMMENT_BLOCK: '/*' .*? '*/' -> skip;
@@ -75,7 +76,10 @@ WHITESPACE : [ \t\r\n]+ -> skip ;
 
 
 program:
-  PROGRAM ID SEMICOLON variable_declaration functions main_function
+  PROGRAM ID {compiler.add_function(compiler.current_function)} SEMICOLON
+  variable_declaration
+  functions
+  main_function
 ;
 
 variable_declaration:
@@ -83,7 +87,12 @@ variable_declaration:
 ;
 
 variables:
-  data_type initialized_variable (COMMA initialized_variable)* SEMICOLON
+  data_type ID declaration_array_brackets? {compiler.current_function.update_variables($data_type.text, $ID.text)}
+  (COMMA ID declaration_array_brackets? {compiler.current_function.update_variables($data_type.text, $ID.text)})* SEMICOLON
+;
+
+declaration_array_brackets:
+  LEFT_BRACKET INT_CONSTANT? RIGHT_BRACKET
 ;
 
 data_type:
@@ -102,53 +111,63 @@ constant:
   STRING_CONSTANT {compiler.add_operand($STRING_CONSTANT.text)}
 ;
 
-initialized_variable:
-  ID (LEFT_BRACKET INT_CONSTANT RIGHT_BRACKET)?
-;
-
 functions:
   function*
 ;
 
 function:
-  FUNCTION (data_type | VOID) ID LEFT_PARENTHESIS parameters? RIGHT_PARENTHESIS variable_declaration? LEFT_CURLY statutes RIGHT_CURLY
+  FUNCTION function_type ID {compiler.current_function=Function($function_type.text, $ID.text, {}, {})}
+  LEFT_PARENTHESIS parameters? RIGHT_PARENTHESIS
+  variable_declaration? {compiler.add_function(compiler.current_function)}
+  LEFT_CURLY statutes RIGHT_CURLY
+;
+
+function_type:
+  (data_type | VOID)
 ;
 
 parameters:
-  data_type ID (COMMA data_type ID)*
+  data_type ID {compiler.current_function.update_parameters($data_type.text, $ID.text)}
+  (COMMA data_type ID {compiler.current_function.update_parameters($data_type.text, $ID.text)})*
 ;
 
 logic_expresions:
-  relational_expresions ((AND {compiler.add_operator($AND.text)} | OR {compiler.add_operator($OR.text)}) relational_expresions)*
+  relational_expresions {compiler.check_for_logic_operators()}
+  ((AND {compiler.add_operator($AND.text)} | OR {compiler.add_operator($OR.text)})
+  relational_expresions {compiler.check_for_logic_operators()})*
 ;
 
 relational_expresions:
-  addition_substraction_expresions {compiler.add_operator($GREATER.text)} ((GREATER {compiler.add_operator($GREATER.text)} |
-    LESS {compiler.add_operator($LESS.text)} |
+  addition_substraction_expresions {compiler.check_for_relational_operators()}
+    ((LESS {compiler.add_operator($LESS.text)} |
     LESS_OR_EQUAL {compiler.add_operator($LESS_OR_EQUAL.text)} |
-    GREATER {compiler.add_operator($GREATER_OR_EQUAL.text)} |
+    GREATER {compiler.add_operator($GREATER.text)} |
     GREATER_OR_EQUAL {compiler.add_operator($GREATER_OR_EQUAL.text)} |
     NOT_EQUAL {compiler.add_operator($NOT_EQUAL.text)} |
     EQUAL {compiler.add_operator($EQUAL.text)}) addition_substraction_expresions)?
 ;
 
 addition_substraction_expresions:
-  multiplication_division_expresions {compiler.check_for_add_or_subs()} ((ADDITION {compiler.add_operator($ADDITION.text)} | SUBTRACTION {compiler.add_operator($SUBTRACTION.text)}) multiplication_division_expresions)*
+  multiplication_division_expresions {compiler.check_for_add_or_subs()}
+  ((ADDITION {compiler.add_operator($ADDITION.text)} | SUBTRACTION {compiler.add_operator($SUBTRACTION.text)})
+  multiplication_division_expresions)*
 ;
 
 multiplication_division_expresions:
-  expresion {compiler.check_for_mult_or_div()} ((MULTIPLICATION {compiler.add_operator($MULTIPLICATION.text)} | DIVISION {compiler.add_operator($DIVISION.text)}) expresion)*
+  expresion {compiler.check_for_mult_or_div()}
+  ((MULTIPLICATION {compiler.add_operator($MULTIPLICATION.text)} | DIVISION {compiler.add_operator($DIVISION.text)})
+  expresion)*
 ;
 
 expresion:
   constant |
-  variable |
-  LEFT_PARENTHESIS {compiler.left_parenthesis()} logic_expresions  RIGHT_PARENTHESIS {compiler.right_parenthesis()} |
+  ID {compiler.add_variable($ID.text)} array_brackets? |
+  LEFT_PARENTHESIS {compiler.left_parenthesis()} logic_expresions RIGHT_PARENTHESIS {compiler.right_parenthesis()} |
   function_call
 ;
 
-variable:
-  ID (LEFT_BRACKET logic_expresions RIGHT_BRACKET)?
+array_brackets:
+  (LEFT_BRACKET logic_expresions RIGHT_BRACKET)
 ;
 
 function_call:
@@ -156,7 +175,7 @@ function_call:
 ;
 
 main_function:
-  MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_CURLY statutes RIGHT_CURLY
+  MAIN {compiler.current_function=Function("void", "main", {}, {})} LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_CURLY statutes RIGHT_CURLY
 ;
 
 statutes:
@@ -171,15 +190,18 @@ statutes:
 ;
 
 assignation: 
-  variable ASSIGN logic_expresions SEMICOLON
+  <assoc=right> ID {compiler.add_variable($ID.text)} array_brackets? ASSIGN {compiler.add_operator($ASSIGN.text)}
+  logic_expresions SEMICOLON {compiler.assign_quadruple()}
 ;
 
+// Aquí pudiera haber un error por los IDs que se mandan en read_quadruple, podrían cambiar los valores antes del punto neurálgico
 read_function_call:
-  INPUT LEFT_PARENTHESIS variable (COMMA variable)* RIGHT_PARENTHESIS SEMICOLON
+  INPUT LEFT_PARENTHESIS ID {compiler.add_variable($ID.text)} array_brackets? {compiler.read_quadruple($ID.text)}
+  (COMMA ID {compiler.add_variable($ID.text)} array_brackets? {compiler.read_quadruple($ID.text)})* RIGHT_PARENTHESIS SEMICOLON
 ;
 
 write_function_call:
-  OUTPUT LEFT_PARENTHESIS (logic_expresions | STRING_CONSTANT) (COMMA (logic_expresions | STRING_CONSTANT))* RIGHT_PARENTHESIS SEMICOLON
+  OUTPUT LEFT_PARENTHESIS logic_expresions {compiler.write_quadruple()} (COMMA (logic_expresions {compiler.write_quadruple()}))* RIGHT_PARENTHESIS SEMICOLON
 ;
 
 void_function_call:
@@ -187,7 +209,7 @@ void_function_call:
 ;
 
 return_statement:
-  RETURN LEFT_PARENTHESIS logic_expresions  RIGHT_PARENTHESIS SEMICOLON
+  RETURN LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS SEMICOLON
 ;
 
 conditional_function:
@@ -201,5 +223,5 @@ while_function:
 ;
 
 from_function:
-  FROM variable ASSIGN logic_expresions TO logic_expresions DO LEFT_CURLY statutes RIGHT_CURLY
+  FROM ID array_brackets? ASSIGN logic_expresions TO logic_expresions DO LEFT_CURLY statutes RIGHT_CURLY
 ;

@@ -1,6 +1,6 @@
 programa low;
 var
-  int i;
+  int j, p;
 
 funcion int fact ()
 var int i;

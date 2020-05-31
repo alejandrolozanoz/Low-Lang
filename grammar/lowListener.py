@@ -39,12 +39,12 @@ class lowListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by lowParser#var_types.
-    def enterVar_types(self, ctx:lowParser.Var_typesContext):
+    # Enter a parse tree produced by lowParser#data_type.
+    def enterData_type(self, ctx:lowParser.Data_typeContext):
         pass
 
-    # Exit a parse tree produced by lowParser#var_types.
-    def exitVar_types(self, ctx:lowParser.Var_typesContext):
+    # Exit a parse tree produced by lowParser#data_type.
+    def exitData_type(self, ctx:lowParser.Data_typeContext):
         pass
 
 
@@ -57,21 +57,21 @@ class lowListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by lowParser#varindividual.
-    def enterVarindividual(self, ctx:lowParser.VarindividualContext):
+    # Enter a parse tree produced by lowParser#initialized_variable.
+    def enterInitialized_variable(self, ctx:lowParser.Initialized_variableContext):
         pass
 
-    # Exit a parse tree produced by lowParser#varindividual.
-    def exitVarindividual(self, ctx:lowParser.VarindividualContext):
+    # Exit a parse tree produced by lowParser#initialized_variable.
+    def exitInitialized_variable(self, ctx:lowParser.Initialized_variableContext):
         pass
 
 
-    # Enter a parse tree produced by lowParser#function_declaration.
-    def enterFunction_declaration(self, ctx:lowParser.Function_declarationContext):
+    # Enter a parse tree produced by lowParser#functions.
+    def enterFunctions(self, ctx:lowParser.FunctionsContext):
         pass
 
-    # Exit a parse tree produced by lowParser#function_declaration.
-    def exitFunction_declaration(self, ctx:lowParser.Function_declarationContext):
+    # Exit a parse tree produced by lowParser#functions.
+    def exitFunctions(self, ctx:lowParser.FunctionsContext):
         pass
 
 
@@ -93,30 +93,39 @@ class lowListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by lowParser#expresions.
-    def enterExpresions(self, ctx:lowParser.ExpresionsContext):
+    # Enter a parse tree produced by lowParser#logic_expresions.
+    def enterLogic_expresions(self, ctx:lowParser.Logic_expresionsContext):
         pass
 
-    # Exit a parse tree produced by lowParser#expresions.
-    def exitExpresions(self, ctx:lowParser.ExpresionsContext):
-        pass
-
-
-    # Enter a parse tree produced by lowParser#multiple_expresions.
-    def enterMultiple_expresions(self, ctx:lowParser.Multiple_expresionsContext):
-        pass
-
-    # Exit a parse tree produced by lowParser#multiple_expresions.
-    def exitMultiple_expresions(self, ctx:lowParser.Multiple_expresionsContext):
+    # Exit a parse tree produced by lowParser#logic_expresions.
+    def exitLogic_expresions(self, ctx:lowParser.Logic_expresionsContext):
         pass
 
 
-    # Enter a parse tree produced by lowParser#expresion_comparison.
-    def enterExpresion_comparison(self, ctx:lowParser.Expresion_comparisonContext):
+    # Enter a parse tree produced by lowParser#relational_expresions.
+    def enterRelational_expresions(self, ctx:lowParser.Relational_expresionsContext):
         pass
 
-    # Exit a parse tree produced by lowParser#expresion_comparison.
-    def exitExpresion_comparison(self, ctx:lowParser.Expresion_comparisonContext):
+    # Exit a parse tree produced by lowParser#relational_expresions.
+    def exitRelational_expresions(self, ctx:lowParser.Relational_expresionsContext):
+        pass
+
+
+    # Enter a parse tree produced by lowParser#addition_substraction_expresions.
+    def enterAddition_substraction_expresions(self, ctx:lowParser.Addition_substraction_expresionsContext):
+        pass
+
+    # Exit a parse tree produced by lowParser#addition_substraction_expresions.
+    def exitAddition_substraction_expresions(self, ctx:lowParser.Addition_substraction_expresionsContext):
+        pass
+
+
+    # Enter a parse tree produced by lowParser#multiplication_division_expresions.
+    def enterMultiplication_division_expresions(self, ctx:lowParser.Multiplication_division_expresionsContext):
+        pass
+
+    # Exit a parse tree produced by lowParser#multiplication_division_expresions.
+    def exitMultiplication_division_expresions(self, ctx:lowParser.Multiplication_division_expresionsContext):
         pass
 
 
@@ -129,30 +138,39 @@ class lowListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by lowParser#term.
-    def enterTerm(self, ctx:lowParser.TermContext):
+    # Enter a parse tree produced by lowParser#variable.
+    def enterVariable(self, ctx:lowParser.VariableContext):
         pass
 
-    # Exit a parse tree produced by lowParser#term.
-    def exitTerm(self, ctx:lowParser.TermContext):
-        pass
-
-
-    # Enter a parse tree produced by lowParser#factor.
-    def enterFactor(self, ctx:lowParser.FactorContext):
-        pass
-
-    # Exit a parse tree produced by lowParser#factor.
-    def exitFactor(self, ctx:lowParser.FactorContext):
+    # Exit a parse tree produced by lowParser#variable.
+    def exitVariable(self, ctx:lowParser.VariableContext):
         pass
 
 
-    # Enter a parse tree produced by lowParser#statute.
-    def enterStatute(self, ctx:lowParser.StatuteContext):
+    # Enter a parse tree produced by lowParser#function_call.
+    def enterFunction_call(self, ctx:lowParser.Function_callContext):
         pass
 
-    # Exit a parse tree produced by lowParser#statute.
-    def exitStatute(self, ctx:lowParser.StatuteContext):
+    # Exit a parse tree produced by lowParser#function_call.
+    def exitFunction_call(self, ctx:lowParser.Function_callContext):
+        pass
+
+
+    # Enter a parse tree produced by lowParser#main_function.
+    def enterMain_function(self, ctx:lowParser.Main_functionContext):
+        pass
+
+    # Exit a parse tree produced by lowParser#main_function.
+    def exitMain_function(self, ctx:lowParser.Main_functionContext):
+        pass
+
+
+    # Enter a parse tree produced by lowParser#statutes.
+    def enterStatutes(self, ctx:lowParser.StatutesContext):
+        pass
+
+    # Exit a parse tree produced by lowParser#statutes.
+    def exitStatutes(self, ctx:lowParser.StatutesContext):
         pass
 
 
@@ -165,84 +183,66 @@ class lowListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by lowParser#voidcall.
-    def enterVoidcall(self, ctx:lowParser.VoidcallContext):
+    # Enter a parse tree produced by lowParser#read_function_call.
+    def enterRead_function_call(self, ctx:lowParser.Read_function_callContext):
         pass
 
-    # Exit a parse tree produced by lowParser#voidcall.
-    def exitVoidcall(self, ctx:lowParser.VoidcallContext):
-        pass
-
-
-    # Enter a parse tree produced by lowParser#returncall.
-    def enterReturncall(self, ctx:lowParser.ReturncallContext):
-        pass
-
-    # Exit a parse tree produced by lowParser#returncall.
-    def exitReturncall(self, ctx:lowParser.ReturncallContext):
+    # Exit a parse tree produced by lowParser#read_function_call.
+    def exitRead_function_call(self, ctx:lowParser.Read_function_callContext):
         pass
 
 
-    # Enter a parse tree produced by lowParser#indexvariable.
-    def enterIndexvariable(self, ctx:lowParser.IndexvariableContext):
+    # Enter a parse tree produced by lowParser#write_function_call.
+    def enterWrite_function_call(self, ctx:lowParser.Write_function_callContext):
         pass
 
-    # Exit a parse tree produced by lowParser#indexvariable.
-    def exitIndexvariable(self, ctx:lowParser.IndexvariableContext):
-        pass
-
-
-    # Enter a parse tree produced by lowParser#read.
-    def enterRead(self, ctx:lowParser.ReadContext):
-        pass
-
-    # Exit a parse tree produced by lowParser#read.
-    def exitRead(self, ctx:lowParser.ReadContext):
+    # Exit a parse tree produced by lowParser#write_function_call.
+    def exitWrite_function_call(self, ctx:lowParser.Write_function_callContext):
         pass
 
 
-    # Enter a parse tree produced by lowParser#write.
-    def enterWrite(self, ctx:lowParser.WriteContext):
+    # Enter a parse tree produced by lowParser#void_function_call.
+    def enterVoid_function_call(self, ctx:lowParser.Void_function_callContext):
         pass
 
-    # Exit a parse tree produced by lowParser#write.
-    def exitWrite(self, ctx:lowParser.WriteContext):
-        pass
-
-
-    # Enter a parse tree produced by lowParser#conditional.
-    def enterConditional(self, ctx:lowParser.ConditionalContext):
-        pass
-
-    # Exit a parse tree produced by lowParser#conditional.
-    def exitConditional(self, ctx:lowParser.ConditionalContext):
+    # Exit a parse tree produced by lowParser#void_function_call.
+    def exitVoid_function_call(self, ctx:lowParser.Void_function_callContext):
         pass
 
 
-    # Enter a parse tree produced by lowParser#whileloop.
-    def enterWhileloop(self, ctx:lowParser.WhileloopContext):
+    # Enter a parse tree produced by lowParser#return_statement.
+    def enterReturn_statement(self, ctx:lowParser.Return_statementContext):
         pass
 
-    # Exit a parse tree produced by lowParser#whileloop.
-    def exitWhileloop(self, ctx:lowParser.WhileloopContext):
-        pass
-
-
-    # Enter a parse tree produced by lowParser#fromloop.
-    def enterFromloop(self, ctx:lowParser.FromloopContext):
-        pass
-
-    # Exit a parse tree produced by lowParser#fromloop.
-    def exitFromloop(self, ctx:lowParser.FromloopContext):
+    # Exit a parse tree produced by lowParser#return_statement.
+    def exitReturn_statement(self, ctx:lowParser.Return_statementContext):
         pass
 
 
-    # Enter a parse tree produced by lowParser#main_function.
-    def enterMain_function(self, ctx:lowParser.Main_functionContext):
+    # Enter a parse tree produced by lowParser#conditional_function.
+    def enterConditional_function(self, ctx:lowParser.Conditional_functionContext):
         pass
 
-    # Exit a parse tree produced by lowParser#main_function.
-    def exitMain_function(self, ctx:lowParser.Main_functionContext):
+    # Exit a parse tree produced by lowParser#conditional_function.
+    def exitConditional_function(self, ctx:lowParser.Conditional_functionContext):
+        pass
+
+
+    # Enter a parse tree produced by lowParser#while_function.
+    def enterWhile_function(self, ctx:lowParser.While_functionContext):
+        pass
+
+    # Exit a parse tree produced by lowParser#while_function.
+    def exitWhile_function(self, ctx:lowParser.While_functionContext):
+        pass
+
+
+    # Enter a parse tree produced by lowParser#from_function.
+    def enterFrom_function(self, ctx:lowParser.From_functionContext):
+        pass
+
+    # Exit a parse tree produced by lowParser#from_function.
+    def exitFrom_function(self, ctx:lowParser.From_functionContext):
         pass
 
 

@@ -9,7 +9,7 @@ compiler = Compiler()
 
 /* ---TOKENS--- */
 
-// Logic
+// Reserved Words
 PROGRAM: 'programa';
 MAIN: 'principal';
 FUNCTION: 'funcion';
@@ -26,6 +26,14 @@ FROM: 'desde';
 TO: 'hasta';
 VOID: 'void';
 
+// Data types
+VAR: 'var';
+STRING: 'string';
+CHAR: 'char';
+INT: 'int';
+FLOAT: 'float';
+BOOL: 'bool';
+
 // Syntax Symbols
 LEFT_PARENTHESIS: '(';
 RIGHT_PARENTHESIS: ')';
@@ -38,35 +46,27 @@ COLON: ':';
 SEMICOLON: ';';
 
 // Operators
-LESS: '<';
-GREATER: '>';
-LESS_OR_EQUAL: '<=';
-GREATER_OR_EQUAL: '>=';
-EQUAL: '==';
-NOT_EQUAL: '!=';
 ASSIGN: '=';
 AND: '&';
 OR: '|';
+LESS: '<';
+LESS_OR_EQUAL: '<=';
+GREATER: '>';
+GREATER_OR_EQUAL: '>=';
+EQUAL: '==';
+NOT_EQUAL: '!=';
 ADDITION: '+';
 SUBTRACTION: '-';
 MULTIPLICATION: '*';
 DIVISION: '/';
 
-// Data types
-VAR: 'var';
-STRING: 'string';
-CHAR: 'char';
-INT: 'int';
-FLOAT: 'float';
-BOOL: 'bool';
-
 //Constants
 STRING_CONSTANT: '"' .*? '"';
-CHAR_CONSTANT: [.];
+CHAR_CONSTANT: [A-Za-z];
 INT_CONSTANT: [0-9]+;
 FLOAT_CONSTANT: [0-9]+.[0-9]+;
 BOOL_CONSTANT: 'true' | 'false';
-VAR_NAME: [_A-Za-z]([_A-Za-z0-9])*;
+ID: [A-Za-z]([_A-Za-z0-9])*;
 
 // Whitespace and comments
 COMMENT_BLOCK: '/*' .*? '*/' -> skip;
@@ -75,7 +75,7 @@ WHITESPACE : [ \t\r\n]+ -> skip ;
 
 
 program:
-  PROGRAM VAR_NAME SEMICOLON variable_declaration function_declaration main_function
+  PROGRAM ID SEMICOLON variable_declaration functions main_function
 ;
 
 variable_declaration:
@@ -83,10 +83,10 @@ variable_declaration:
 ;
 
 variables:
-  var_types varindividual (COMMA varindividual)* SEMICOLON
+  data_type initialized_variable (COMMA initialized_variable)* SEMICOLON
 ;
 
-var_types:
+data_type:
   INT {compiler.add_type($INT.text)} |
   BOOL {compiler.add_type($BOOL.text)} |
   FLOAT {compiler.add_type($FLOAT.text)} |
@@ -102,101 +102,104 @@ constant:
   STRING_CONSTANT {compiler.add_operand($STRING_CONSTANT.text)}
 ;
 
-varindividual:
-  VAR_NAME (LEFT_BRACKET INT_CONSTANT? RIGHT_BRACKET)?
+initialized_variable:
+  ID (LEFT_BRACKET INT_CONSTANT RIGHT_BRACKET)?
 ;
 
-function_declaration:
+functions:
   function*
 ;
 
 function:
-  FUNCTION (var_types | VOID) VAR_NAME LEFT_PARENTHESIS parameters? RIGHT_PARENTHESIS variable_declaration? LEFT_CURLY statute? RIGHT_CURLY
+  FUNCTION (data_type | VOID) ID LEFT_PARENTHESIS parameters? RIGHT_PARENTHESIS variable_declaration? LEFT_CURLY statutes RIGHT_CURLY
 ;
 
 parameters:
-  var_types VAR_NAME (COMMA var_types VAR_NAME)*
+  data_type ID (COMMA data_type ID)*
 ;
 
-expresions:
-  multiple_expresions (ASSIGN multiple_expresions)*
+logic_expresions:
+  relational_expresions ((AND {compiler.add_operator($AND.text)} | OR {compiler.add_operator($OR.text)}) relational_expresions)*
 ;
 
-multiple_expresions:
-  expresion_comparison ((AND {compiler.add_operator($AND.text)} | OR {compiler.add_operator($OR.text)}) expresion_comparison)*
-;
-
-expresion_comparison:
-  expresion {compiler.add_operator($GREATER.text)} ((GREATER {compiler.add_operator($GREATER.text)} |
+relational_expresions:
+  addition_substraction_expresions {compiler.add_operator($GREATER.text)} ((GREATER {compiler.add_operator($GREATER.text)} |
     LESS {compiler.add_operator($LESS.text)} |
-    GREATER_OR_EQUAL {compiler.add_operator($GREATER_OR_EQUAL.text)} |
     LESS_OR_EQUAL {compiler.add_operator($LESS_OR_EQUAL.text)} |
+    GREATER {compiler.add_operator($GREATER_OR_EQUAL.text)} |
+    GREATER_OR_EQUAL {compiler.add_operator($GREATER_OR_EQUAL.text)} |
     NOT_EQUAL {compiler.add_operator($NOT_EQUAL.text)} |
-    EQUAL {compiler.add_operator($EQUAL.text)}) expresion)?
+    EQUAL {compiler.add_operator($EQUAL.text)}) addition_substraction_expresions)?
+;
+
+addition_substraction_expresions:
+  multiplication_division_expresions {compiler.check_for_add_or_subs()} ((ADDITION {compiler.add_operator($ADDITION.text)} | SUBTRACTION {compiler.add_operator($SUBTRACTION.text)}) multiplication_division_expresions)*
+;
+
+multiplication_division_expresions:
+  expresion {compiler.check_for_mult_or_div()} ((MULTIPLICATION {compiler.add_operator($MULTIPLICATION.text)} | DIVISION {compiler.add_operator($DIVISION.text)}) expresion)*
 ;
 
 expresion:
-  term {compiler.check_for_add_or_subs()} ((ADDITION {compiler.add_operator($ADDITION.text)} | SUBTRACTION {compiler.add_operator($SUBTRACTION.text)}) term)*
+  constant |
+  variable |
+  LEFT_PARENTHESIS {compiler.left_parenthesis()} logic_expresions  RIGHT_PARENTHESIS {compiler.right_parenthesis()} |
+  function_call
 ;
 
-term:
-  factor {compiler.check_for_mult_or_div()} ((MULTIPLICATION {compiler.add_operator($MULTIPLICATION.text)} | DIVISION {compiler.add_operator($DIVISION.text)}) factor)*
+variable:
+  ID (LEFT_BRACKET logic_expresions RIGHT_BRACKET)?
 ;
 
-factor:
-  LEFT_PARENTHESIS {compiler.left_parenthesis()} expresions RIGHT_PARENTHESIS {compiler.right_parenthesis()} |
-  VAR_NAME LEFT_PARENTHESIS {compiler.left_parenthesis()} ( multiple_expresions (COMMA multiple_expresions)* )? RIGHT_PARENTHESIS {compiler.right_parenthesis()} |
-  indexvariable |
-  constant
-;
-
-statute:
-  (assignation |
-  voidcall |
-  returncall |
-  read |
-  write |
-  conditional |
-  whileloop |
-  fromloop )*
-;
-
-assignation: 
-  VAR_NAME (LEFT_BRACKET multiple_expresions RIGHT_BRACKET)? ASSIGN expresions SEMICOLON
-;
-
-voidcall:
-  VAR_NAME LEFT_PARENTHESIS ( multiple_expresions (COMMA multiple_expresions)* )? RIGHT_PARENTHESIS SEMICOLON
-;
-
-returncall:
-  RETURN LEFT_PARENTHESIS expresions RIGHT_PARENTHESIS SEMICOLON
-;
-
-indexvariable:
-  VAR_NAME (LEFT_BRACKET multiple_expresions RIGHT_BRACKET)?
-;
-
-read:
-  INPUT LEFT_PARENTHESIS indexvariable (COMMA indexvariable)* RIGHT_PARENTHESIS SEMICOLON
-;
-
-write:
-  OUTPUT LEFT_PARENTHESIS (expresions | STRING_CONSTANT) (COMMA (expresions | STRING_CONSTANT))* RIGHT_PARENTHESIS SEMICOLON
-;
-
-conditional:
-  IF LEFT_PARENTHESIS multiple_expresions RIGHT_PARENTHESIS THEN LEFT_CURLY statute RIGHT_CURLY (ELSE_IF LEFT_PARENTHESIS multiple_expresions RIGHT_PARENTHESIS THEN LEFT_CURLY statute RIGHT_CURLY)? (ELSE LEFT_CURLY statute RIGHT_CURLY)?
-;
-
-whileloop:
-  WHILE LEFT_PARENTHESIS multiple_expresions RIGHT_PARENTHESIS DO LEFT_CURLY statute RIGHT_CURLY
-;
-
-fromloop:
-  FROM VAR_NAME indexvariable? ASSIGN multiple_expresions TO multiple_expresions DO LEFT_CURLY statute RIGHT_CURLY
+function_call:
+  ID LEFT_PARENTHESIS (logic_expresions (COMMA logic_expresions)* )? RIGHT_PARENTHESIS
 ;
 
 main_function:
-  MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_CURLY statute RIGHT_CURLY
+  MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_CURLY statutes RIGHT_CURLY
+;
+
+statutes:
+  (assignation |
+  read_function_call |
+  write_function_call |
+  void_function_call |
+  return_statement |
+  conditional_function |
+  while_function |
+  from_function )*
+;
+
+assignation: 
+  variable ASSIGN logic_expresions SEMICOLON
+;
+
+read_function_call:
+  INPUT LEFT_PARENTHESIS variable (COMMA variable)* RIGHT_PARENTHESIS SEMICOLON
+;
+
+write_function_call:
+  OUTPUT LEFT_PARENTHESIS (logic_expresions | STRING_CONSTANT) (COMMA (logic_expresions | STRING_CONSTANT))* RIGHT_PARENTHESIS SEMICOLON
+;
+
+void_function_call:
+  function_call SEMICOLON
+;
+
+return_statement:
+  RETURN LEFT_PARENTHESIS logic_expresions  RIGHT_PARENTHESIS SEMICOLON
+;
+
+conditional_function:
+  IF LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS THEN LEFT_CURLY statutes RIGHT_CURLY
+  (ELSE_IF LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS THEN LEFT_CURLY statutes RIGHT_CURLY)?
+  (ELSE LEFT_CURLY statutes RIGHT_CURLY)?
+;
+
+while_function:
+  WHILE LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS DO LEFT_CURLY statutes RIGHT_CURLY
+;
+
+from_function:
+  FROM variable ASSIGN logic_expresions TO logic_expresions DO LEFT_CURLY statutes RIGHT_CURLY
 ;

@@ -1,0 +1,107 @@
+// Used to produce Railroad Diagrams in https://www.bottlecaps.de/rr/ui 
+
+PROGRAM ::= 'programa'
+MAIN ::= 'principal'
+FUNCTION ::= 'funcion'
+RETURN ::= 'regresa'
+INPUT ::= 'lee'
+OUTPUT ::= 'escribe'
+IF ::= 'si'
+THEN ::= 'entonces'
+ELSE_IF ::= 'o si'
+ELSE ::= 'sino'
+WHILE ::= 'mientras'
+DO ::= 'hacer'
+FROM ::= 'desde'
+TO ::= 'hasta'
+VOID ::= 'void'
+
+VAR ::= 'var'
+STRING ::= 'string'
+CHAR ::= 'char'
+INT ::= 'int'
+FLOAT ::= 'float'
+BOOL ::= 'bool'
+
+LEFT_PARENTHESIS ::= '('
+RIGHT_PARENTHESIS ::= ')'
+LEFT_BRACKET ::= '['
+RIGHT_BRACKET ::= ']'
+LEFT_CURLY ::= '{'
+RIGHT_CURLY ::= '}'
+COMMA ::= ','
+COLON ::= ':'
+SEMICOLON ::= ';'
+
+ASSIGN ::= '='
+AND ::= '&'
+OR ::= '|'
+LESS ::= '<'
+LESS_OR_EQUAL ::= '<='
+GREATER ::= '>'
+GREATER_OR_EQUAL ::= '>='
+EQUAL ::= '=='
+NOT_EQUAL ::= '!='
+ADDITION ::= '+'
+SUBTRACTION ::= '-'
+MULTIPLICATION ::= '*'
+DIVISION ::= '/'
+
+STRING_CONSTANT ::= '"' ANY_ASCII_CHAR '"'
+CHAR_CONSTANT ::= [A-Za-z]
+INT_CONSTANT ::= [0-9]+
+FLOAT_CONSTANT ::= [0-9]+.[0-9]+
+BOOL_CONSTANT ::= 'true' | 'false'
+ID ::= [A-Za-z]([_A-Za-z0-9])*
+
+program ::= PROGRAM ID SEMICOLON variable_declaration functions main_function
+
+variable_declaration ::= VAR variables+
+
+variables ::= data_type initialized_variable (COMMA initialized_variable)* SEMICOLON
+
+data_type ::= INT | BOOL | FLOAT | STRING | CHAR
+
+constant ::= BOOL_CONSTANT| FLOAT_CONSTANT | INT_CONSTANT | CHAR_CONSTANT | STRING_CONSTANT
+
+initialized_variable ::= ID (LEFT_BRACKET INT_CONSTANT RIGHT_BRACKET)?
+
+functions ::= function*
+
+function ::= FUNCTION (data_type | VOID) ID LEFT_PARENTHESIS parameters? RIGHT_PARENTHESIS variable_declaration? LEFT_CURLY statutes RIGHT_CURLY 
+
+parameters ::= data_type ID (COMMA data_type ID)* 
+
+logic_expresions ::= relational_expresions ((AND | OR ) relational_expresions)* 
+
+relational_expresions ::= addition_substraction_expresions ((GREATER | LESS | LESS_OR_EQUAL | GREATER | GREATER_OR_EQUAL | NOT_EQUAL | EQUAL) addition_substraction_expresions)?
+
+addition_substraction_expresions ::= multiplication_division_expresions ((ADDITION | SUBTRACTION) multiplication_division_expresions)*
+
+multiplication_division_expresions ::= expresion ((MULTIPLICATION | DIVISION) expresion)*
+
+expresion ::= constant | variable | LEFT_PARENTHESIS logic_expresions  RIGHT_PARENTHESIS | ID LEFT_PARENTHESIS (logic_expresions (COMMA logic_expresions)* )? RIGHT_PARENTHESIS
+
+variable ::= ID (LEFT_BRACKET logic_expresions RIGHT_BRACKET)?
+
+function_call ::= ID LEFT_PARENTHESIS (logic_expresions (COMMA logic_expresions)* )? RIGHT_PARENTHESIS
+
+main_function ::= MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_CURLY statutes RIGHT_CURLY
+
+statutes ::= (assignation | read_function_call | write_function_call | void_function_call | return_statement | conditional_function | while_function | from_function )*
+
+assignation ::= variable ASSIGN logic_expresions SEMICOLON
+
+read_function_call ::= INPUT LEFT_PARENTHESIS variable (COMMA variable)* RIGHT_PARENTHESIS SEMICOLON
+
+write_function_call ::= OUTPUT LEFT_PARENTHESIS (logic_expresions | STRING_CONSTANT) (COMMA (logic_expresions | STRING_CONSTANT))* RIGHT_PARENTHESIS SEMICOLON
+
+void_function_call ::= function_call SEMICOLON
+
+return_statement ::= RETURN LEFT_PARENTHESIS logic_expresions  RIGHT_PARENTHESIS SEMICOLON
+
+conditional_function ::= IF LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS THEN LEFT_CURLY statutes RIGHT_CURLY (ELSE_IF LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS THEN LEFT_CURLY statutes RIGHT_CURLY)? (ELSE LEFT_CURLY statutes RIGHT_CURLY)?
+
+while_function ::= WHILE LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS DO LEFT_CURLY statutes RIGHT_CURLY
+
+from_function ::= FROM variable ASSIGN logic_expresions TO logic_expresions DO LEFT_CURLY statutes RIGHT_CURLY

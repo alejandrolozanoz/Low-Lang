@@ -19,7 +19,6 @@ INPUT: 'lee';
 OUTPUT: 'escribe';
 IF: 'si';
 THEN: 'entonces';
-ELSE_IF: 'o si';
 ELSE: 'sino';
 WHILE: 'mientras';
 DO: 'hacer';
@@ -213,15 +212,19 @@ return_statement:
 ;
 
 conditional_function:
-  IF LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS THEN LEFT_CURLY statutes RIGHT_CURLY
-  (ELSE_IF LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS THEN LEFT_CURLY statutes RIGHT_CURLY)?
-  (ELSE LEFT_CURLY statutes RIGHT_CURLY)?
+  IF LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS
+  {compiler.if_statement()} THEN LEFT_CURLY statutes RIGHT_CURLY
+  (ELSE {compiler.else_statement()} LEFT_CURLY statutes RIGHT_CURLY {compiler.end_if_function()})?
+  {compiler.end_if_function()}
 ;
 
 while_function:
-  WHILE LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS DO LEFT_CURLY statutes RIGHT_CURLY
+  WHILE LEFT_PARENTHESIS {compiler.while_statement()} logic_expresions RIGHT_PARENTHESIS {compiler.while_statutes()}
+  DO LEFT_CURLY statutes {compiler.while_end()} RIGHT_CURLY
 ;
 
 from_function:
-  FROM ID array_brackets? ASSIGN logic_expresions TO logic_expresions DO LEFT_CURLY statutes RIGHT_CURLY
+  FROM ID array_brackets? ASSIGN {compiler.addOperator($ASSIGN.text)} logic_expresions
+  TO {compiler.generateFromBeforeCheck()} logic_expresions
+  DO LEFT_CURLY statutes RIGHT_CURLY
 ;

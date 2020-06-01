@@ -1,0 +1,10 @@
+programa low;
+var int x;
+
+principal() {
+    x = 0
+    mientras (false) hacer {
+        regresa (x);
+        x = x+1;
+    }
+}

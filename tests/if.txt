@@ -1,0 +1,11 @@
+programa low;
+var bool i;
+
+principal() {
+    si (true) entonces {
+        regresa ("Hola");
+    }
+    sino {
+        regresa ("Bye");
+    }
+}

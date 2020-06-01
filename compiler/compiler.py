@@ -17,7 +17,7 @@ class Compiler:
         self.operands_stack = []
         self.jumps_stack = []
         self.types_stack = []
-
+        self.fromVariablesStack = []
         self.counter = 0
         
     def add_function(self, function: Function):
@@ -61,21 +61,25 @@ class Compiler:
         operator = self.operators_stack.pop()
         right_operand_type = self.types_stack.pop()
         left_operand_type = self.types_stack.pop()
-        if SemanticCube().check_operation(left_operand_type, right_operand_type, operator) == Types().ERROR:
+        result_type = SemanticCube().check_operation(left_operand_type, right_operand_type, operator) == Types().ERROR
+        if result_type:
             print('ERROR: Los tipos de datos de la operación no son compatibles.')
         else:
-            self.quadruples.append(operator, left_operand, right_operand, "_")
+            # Create quadruple and add its type and and result to type and operand stacks
+            self.quadruples.append(operator, left_operand, right_operand, None)
+            self.types_stack.append(SemanticCube().check_operation(left_operand_type, right_operand_type, operator))
+            self.operands_stack.append(None)
 
     def read_quadruple(self, operand):
         if (operand in self.current_function.function_type) or (operand in self.functions_table.functions["global"].function_type):
-            self.quadruples.append("read", operand, None, "_")
+            self.quadruples.append("read", operand, None, None)
         else:
             print('La variable ' + str(operand) + ' no está declarada')
     
     def write_quadruple(self):
         printed_operand = self.operands_stack.pop()
         self.types_stack.pop()
-        self.quadruples.append("print", printed_operand, None, "_")
+        self.quadruples.append("print", printed_operand, None, None)
 
 
     def assign_quadruple(self):
@@ -89,7 +93,7 @@ class Compiler:
             if SemanticCube().check_operation(left_operand_type, right_operand_type, operator) == Types().ERROR:
                 print('ERROR: Los tipos de datos de la asignación no son compatibles.')
     
-            self.quadruples.append(operator, left_operand, right_operand, "_")
+            self.quadruples.append(operator, left_operand, right_operand, None)
 
     def check_for_mult_or_div(self):
         if len(self.operators_stack) is not 0 and self.operators_stack[-1] in [Operations.MULTIPLICATION, Operations.DIVISION]:
@@ -106,3 +110,55 @@ class Compiler:
     def check_for_logic_operators(self):
         if len(self.operators_stack) > 0 and self.operators_stack[-1] in [Operations.AND, Operations.OR]:
             self.operation_quadruple()
+
+    def check_for_assignment(self):
+        if len(self.operators_stack) > 0 and self.operators_stack[-1] == Operations.ASSIGN:
+            self.operation_quadruple()
+
+    def if_statement(self):
+        if len(self.operands_stack) != 0:
+            # Check if while statement is valid
+            conditionVar = self.operands_stack.pop()
+            typeConditionVar = self.types_stack.pop()
+            if typeConditionVar == Types.BOOL:
+                # Create GOTOF and save quad in jumps stack to fill when we know false jump location
+                self.jumps_stack.append(self.quadruples.length())
+                self.quadruples.append("GOTOF", conditionVar, None, None)
+            else:
+                print('Error: ' + conditionVar + ' is not a boolean, its ' + typeConditionVar)
+
+    def else_statement(self):
+        # Create GOTO and save quad in jumps stack to fill when we know jump location
+        self.jumps_stack.append(self.quadruples.length())
+        self.quadruples.append("GOTO", None , None, None)
+
+    def end_if_function(self):
+        # Fill if's GOTOF quad with current index
+        GOTOF = self.jumps_stack.pop()
+        self.quadruples.quads[GOTOF].result = self.quadruples.length()
+
+    def while_statement(self):
+        # Save while statement quad in jumps stack to fill when we know jump location
+        self.jumps_stack.append(self.quadruples.length())
+
+    def while_statutes(self):
+        print("WhileQuad")
+        if len(self.operands_stack) != 0:
+            conditionVar = self.operands_stack.pop()
+            typeConditionVar = self.types_stack.pop()
+            if typeConditionVar == Types().ERROR:
+                # Save begin statutes quad in jumps stack to fill when we know jump location
+                self.jumps_stack.append(self.quadruples.length())
+                self.quadruples.append("GOTOF", conditionVar, None, None)
+            else:
+                print('Error: ' + conditionVar + ' is ' + typeConditionVar + ' + ' + 'insted of a boolean')
+
+    def while_end(self):
+        # Get while statutes index to generate GOTO quad to loop in while
+        while_statement_index = self.jumps_stack.pop()
+        self.quadruples.append("GOTO", None, None, while_statement_index)
+        # Fill while statutes quad with ending of while
+        while_statutes_index = self.jumps_stack.pop()
+        self.quadruples.quads[while_statutes_index].result = self.quadruples.length()
+
+

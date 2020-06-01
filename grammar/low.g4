@@ -214,8 +214,8 @@ return_statement:
 conditional_function:
   IF LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS
   {compiler.if_statement()} THEN LEFT_CURLY statutes RIGHT_CURLY
-  (ELSE {compiler.else_statement()} LEFT_CURLY statutes RIGHT_CURLY {compiler.end_if_function()})?
-  {compiler.end_if_function()}
+  (ELSE {compiler.else_statement()} LEFT_CURLY statutes RIGHT_CURLY {compiler.end_if_else_function()})?
+  {compiler.end_if_else_function()}
 ;
 
 while_function:
@@ -224,7 +224,7 @@ while_function:
 ;
 
 from_function:
-  FROM ID array_brackets? ASSIGN {compiler.addOperator($ASSIGN.text)} logic_expresions
-  TO {compiler.generateFromBeforeCheck()} logic_expresions
-  DO LEFT_CURLY statutes RIGHT_CURLY
+  FROM ID array_brackets? ASSIGN logic_expresions {compiler.from_initialize($ID.text)} 
+  TO INT_CONSTANT {compiler.add_operand($INT_CONSTANT.text)} {compiler.from_statutes()}
+  DO LEFT_CURLY statutes {compiler.end_from()} RIGHT_CURLY 
 ;

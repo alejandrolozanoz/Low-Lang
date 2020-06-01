@@ -17,7 +17,7 @@ class Compiler:
         self.operands_stack = []
         self.jumps_stack = []
         self.types_stack = []
-        self.fromVariablesStack = []
+        self.from_variables_stack = []
         self.counter = 0
         
     def add_function(self, function: Function):
@@ -132,7 +132,7 @@ class Compiler:
         self.jumps_stack.append(self.quadruples.length())
         self.quadruples.append("GOTO", None , None, None)
 
-    def end_if_function(self):
+    def end_if_else_function(self):
         # Fill if's GOTOF quad with current index
         GOTOF = self.jumps_stack.pop()
         self.quadruples.quads[GOTOF].result = self.quadruples.length()
@@ -142,11 +142,10 @@ class Compiler:
         self.jumps_stack.append(self.quadruples.length())
 
     def while_statutes(self):
-        print("WhileQuad")
         if len(self.operands_stack) != 0:
             conditionVar = self.operands_stack.pop()
             typeConditionVar = self.types_stack.pop()
-            if typeConditionVar == Types().ERROR:
+            if typeConditionVar == Types().Bool:
                 # Save begin statutes quad in jumps stack to fill when we know jump location
                 self.jumps_stack.append(self.quadruples.length())
                 self.quadruples.append("GOTOF", conditionVar, None, None)
@@ -154,11 +153,57 @@ class Compiler:
                 print('Error: ' + conditionVar + ' is ' + typeConditionVar + ' + ' + 'insted of a boolean')
 
     def while_end(self):
-        # Get while statutes index to generate GOTO quad to loop in while
+        # Get while statement index to generate GOTO quad to loop in while
         while_statement_index = self.jumps_stack.pop()
         self.quadruples.append("GOTO", None, None, while_statement_index)
         # Fill while statutes quad with ending of while
         while_statutes_index = self.jumps_stack.pop()
         self.quadruples.quads[while_statutes_index].result = self.quadruples.length()
+    
+    def from_initialize(self, operand):
+        # From variable was already declared locally or globally 
+        if (operand in self.current_function.function_variables) or (operand in self.functions_table.functions["global"].function_variables):
+            # Check if variable is INT to procede
+            if (self.current_function.function_variables[operand].variable_type == Types.INT) or (self.functions_table.functions["global"].function_variables[operand].variable_type == Types.INT):
+                # Create 'from_function' in function table and add variable
+                self.add_function(self.current_function)
+                self.current_function = Function('void', 'from_function', {}, {})
 
+                # Pop variable value and save
+                from_variable_value = self.operands_stack.pop()
+                self.current_function.function_variables['from_variable'] = Variable(Types.INT, 'from_variable', from_variable_value)
 
+                # Save from statement quad in jumps stack to fill when we know jump location
+                self.jumps_stack.append(self.quadruples.length())
+
+            else:
+                print('The variable ' + operand + 'is not an int')
+
+        else:
+            print('The variable ' + operand + ' is not declared')
+
+    def from_statutes(self):                
+        if len(self.operands_stack) != 0:
+
+            # Get the initial and limit values of the from loop
+            from_variable = self.current_function.function_variables['from_variable']
+            from_variable_limit_value = self.operands_stack.pop()
+            from_variable_limit_type = self.types_stack.pop()
+
+            if from_variable_limit_type == Types.INT:
+                # Add point to jump stack and create GOTOF
+                self.jumps_stack.append(self.quadruples.length())
+                self.quadruples.append("GOTOF", None, None, None)
+                
+                if (from_variable < from_variable_limit_value):
+                    self.current_function.function_variables['from_variable'].variable_value += 1
+            else:
+                print('Error: The expression resulting in {expResult} must be an integer')
+    
+    def end_from(self):
+        # Get from statutes index to generate GOTO quad to loop back to from
+        from_statement_index = self.jumps_stack.pop()
+        self.quadruples.append("GOTO", None, None, from_statement_index)
+        # Fill from statutes quad with ending of while
+        from_statutes_index = self.jumps_stack.pop()
+        self.quadruples.quads[from_statutes_index].result = self.quadruples.length()

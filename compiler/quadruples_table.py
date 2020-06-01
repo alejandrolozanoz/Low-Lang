@@ -8,7 +8,7 @@ class QuadruplesTable:
     def append(self, operator, left_operand, right_operand, result = None):
         quadruple = Quadruple(operator, left_operand, right_operand, result)
         self.quads.append(quadruple)
-        print(operator, left_operand, right_operand, result)
+        print('Quad: ', operator, left_operand, right_operand, result)
     
     def length(self):
         return len(self.quads)

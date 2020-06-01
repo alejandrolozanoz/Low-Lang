@@ -10,11 +10,11 @@ class FunctionsTable:
 		if function.function_name not in self.functions:
 			self.functions[function.function_name] = function
 		else:
-			print('La función ' + str(function.name) + ' ya estaba declarada.')
+			print('ERROR: La función ' + str(function.name) + ' ya estaba declarada.')
 
 	def get_function(self, function_name):
 		if function_name not in self.functions:
-			print(str(function_name) + ' no existe en la tabla de funciones.')
+			print('ERROR: La función ' + str(function_name) + ' no existe en la tabla de funciones.')
 
 		else:
 			return self.functions[function_name]

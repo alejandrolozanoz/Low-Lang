@@ -10,17 +10,19 @@ from semantics.semantic_cube import SemanticCube
 class Compiler:
     def __init__(self):
         self.functions_table = FunctionsTable()
-        self.current_function = Function("void", "global", {}, {})
+        self.current_function = Function("void", "global", [], {})
         self.semantic_cube = SemanticCube()
         self.quadruples = QuadruplesTable()
         self.operators_stack = []
         self.operands_stack = []
         self.jumps_stack = []
         self.types_stack = []
+        self.functionStack = []
         self.from_variables_stack = []
         self.counter = 0
         
     def add_function(self, function: Function):
+        self.current_function.start_quadruple = self.quadruples.length()
         self.functions_table.add_function(function)
 
     def add_variable(self, variable_name):
@@ -32,28 +34,34 @@ class Compiler:
             self.operands_stack.append(variable_name)
             self.add_type(self.functions_table.functions["global"].function_variables[variable_name].variable_type)
         
+        elif variable_name in self.functions_table:
+             if self.functions_table.functions[variable_name].function_type == 'void':
+                 print('ERROR: No se puede asignar una función void ' + variable_name + ' a una variable')
+             else:
+                 self.operands_stack.append(variable_name)
+                 self.add_type(self.functions_table.functions[variable_name].returntype)
         else:
-            print('La variable ' + str(variable_name) + ' no está declarada')
+            print('ERROR: La variable ' + str(variable_name) + ' no está declarada')
 
     def add_operator(self, operator):
         self.operators_stack.append(operator)
-        print(operator)
+        print('Operator: ', operator)
 
     def add_type(self, type):
         self.types_stack.append(type)
-        print(type)
+        print('Operator: ', type)
 
     def add_operand(self, operand):
         self.operands_stack.append(operand)
-        print(operand)
+        print('Operator: ', operand)
 
     def left_parenthesis(self):
         self.operators_stack.append('(')
-        print('(')
+        print('Operator: (')
 
     def right_parenthesis(self):
         self.operators_stack.pop()
-        print(')')
+        print('Operator: )')
     
     def operation_quadruple(self):
         right_operand = self.operands_stack.pop()
@@ -74,7 +82,7 @@ class Compiler:
         if (operand in self.current_function.function_type) or (operand in self.functions_table.functions["global"].function_type):
             self.quadruples.append("read", operand, None, None)
         else:
-            print('La variable ' + str(operand) + ' no está declarada')
+            print('ERROR: La variable ' + str(operand) + ' no está declarada')
     
     def write_quadruple(self):
         printed_operand = self.operands_stack.pop()
@@ -125,7 +133,7 @@ class Compiler:
                 self.jumps_stack.append(self.quadruples.length())
                 self.quadruples.append("GOTOF", conditionVar, None, None)
             else:
-                print('Error: ' + conditionVar + ' is not a boolean, its ' + typeConditionVar)
+                print('ERROR: ' + conditionVar + ' is not a boolean, its ' + typeConditionVar)
 
     def else_statement(self):
         # Create GOTO and save quad in jumps stack to fill when we know jump location
@@ -150,7 +158,7 @@ class Compiler:
                 self.jumps_stack.append(self.quadruples.length())
                 self.quadruples.append("GOTOF", conditionVar, None, None)
             else:
-                print('Error: ' + conditionVar + ' is ' + typeConditionVar + ' + ' + 'insted of a boolean')
+                print('ERROR: ' + conditionVar + ' is ' + typeConditionVar + ' + ' + 'insted of a boolean')
 
     def while_end(self):
         # Get while statement index to generate GOTO quad to loop in while
@@ -167,7 +175,7 @@ class Compiler:
             if (self.current_function.function_variables[operand].variable_type == Types.INT) or (self.functions_table.functions["global"].function_variables[operand].variable_type == Types.INT):
                 # Create 'from_function' in function table and add variable
                 self.add_function(self.current_function)
-                self.current_function = Function('void', 'from_function', {}, {})
+                self.current_function = Function('void', 'from_function', [], {})
 
                 # Pop variable value and save
                 from_variable_value = self.operands_stack.pop()
@@ -177,16 +185,19 @@ class Compiler:
                 self.jumps_stack.append(self.quadruples.length())
 
             else:
-                print('The variable ' + operand + 'is not an int')
-
+                print('ERROR: La variable ' + operand + 'no es un entero')
         else:
-            print('The variable ' + operand + ' is not declared')
+            print('ERROR: La variable ' + operand + ' no está declarada')
 
     def from_statutes(self):                
         if len(self.operands_stack) != 0:
 
             # Get the initial and limit values of the from loop
-            from_variable = self.current_function.function_variables['from_variable']
+            try: 
+                from_variable = self.current_function.function_variables['from_variable']
+            except:
+                print('ERROR: No se encontró la variable del loop desde-hasta')
+            
             from_variable_limit_value = self.operands_stack.pop()
             from_variable_limit_type = self.types_stack.pop()
 
@@ -198,7 +209,7 @@ class Compiler:
                 if (from_variable < from_variable_limit_value):
                     self.current_function.function_variables['from_variable'].variable_value += 1
             else:
-                print('Error: The expression resulting in {expResult} must be an integer')
+                print('ERROR: The expression resulting in {expResult} must be an integer')
     
     def end_from(self):
         # Get from statutes index to generate GOTO quad to loop back to from
@@ -207,3 +218,58 @@ class Compiler:
         # Fill from statutes quad with ending of while
         from_statutes_index = self.jumps_stack.pop()
         self.quadruples.quads[from_statutes_index].result = self.quadruples.length()
+
+    def add_function_operand_type(self, operand):
+        if self.functions_table[operand].returntype == 'void':
+            print('ERROR: Cannot assign void function ' + operand + ' to value')
+        else:
+            self.operands_stack.append(operand)
+            self.addType(self.functions_table[operand].returntype)
+
+
+    def check_parameters(self, id, currentCounter):
+        if len(self.functions_table[id].parametersTable) == currentCounter:
+            # reversed FOR because the parametersTable is reversed in relation to operands_stack
+            # example: funccall(0, 1, 2) --> passed_parameter is the one we want to match with 2
+            for parameter in reversed(self.functions_table[id].parametersTable):
+                passed_parameter = self.operands_stack.pop()
+                passed_parameter_type = self.types_stack.pop()
+                
+                if(parameter.vartype != passed_parameter_type):
+                    print('ERROR: Parameter ' + passed_parameter + ' of type ' + passed_parameter_type + 'cannot be matched with ' + parameter.vartype)
+                else:
+                    # tenemos que asignar a memoria aqui passed_parameter con su type
+                    print("Parametros correctos")
+        else:
+            print('ERROR: Number of parameters in call to function ' + id ' does not match the amount declared')
+
+    def goto_function(self, id):
+        self.quadruples.append('GOTO', None, None, self.functions_table[id].startQuadruple)
+
+    def end_function(self):
+        self.current_function.end_quadruple = len(self.quadruples)
+        self.quadruples.append('GOTO', None, None, '_')
+
+
+    def return_end_function(self):
+        if self.current_function.returntype != "void":
+            self.current_function.end_quadruple = len(self.quadruples)
+            self.quadruples.append('GOTO', None, None, '_')
+        else:
+            print('ERROR: Void function ' + self.current_function.name + ' cannot have a return statement')
+
+    def void_function(self, id):
+        if id in self.functions_table:
+            if self.functions_table[id].returntype != 'void':
+                print('ERROR: Function ' + id + ' return value must be assigned')
+            else:
+                print('VOID FUNCTION: Pudimos llamar void function', {id})
+        else:
+            print('ERROR: Function ' + id + ' is not declared.')
+
+    def void_end_function(self):
+        if self.current_function.returntype == "void":
+            self.current_function.end_quadruple = len(self.quadruples)
+            self.quadruples.append('GOTO', None, None, '_')
+        else:
+            print('ERROR: No return value in function ' + self.current_function.name} + 'of type ' + self.current_function.returntype)

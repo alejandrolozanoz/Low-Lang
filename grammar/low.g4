@@ -115,10 +115,10 @@ functions:
 ;
 
 function:
-  FUNCTION function_type ID {compiler.current_function=Function($function_type.text, $ID.text, {}, {})}
+  FUNCTION function_type ID {compiler.current_function=Function($function_type.text, $ID.text, [], {})}
   LEFT_PARENTHESIS parameters? RIGHT_PARENTHESIS
   variable_declaration? {compiler.add_function(compiler.current_function)}
-  LEFT_CURLY statutes RIGHT_CURLY
+  LEFT_CURLY statutes RIGHT_CURLY {compiler.end_function()}
 ;
 
 function_type:
@@ -162,7 +162,15 @@ expresion:
   constant |
   ID {compiler.add_variable($ID.text)} array_brackets? |
   LEFT_PARENTHESIS {compiler.left_parenthesis()} logic_expresions RIGHT_PARENTHESIS {compiler.right_parenthesis()} |
-  function_call
+  function_call |
+  function_parameters
+;
+
+function_parameters:
+  ID {compiler.add_function_operand_type($ID.text)} LEFT_PARENTHESIS {compiler.addParenthesis()} {currentCounter=0}
+  (multiplication_division_expresions {currentCounter += 1} (COMMA multiplication_division_expresions {currentCounter += 1}))*
+  {compiler.goto_function($ID.text)} {compiler.check_parameters($ID.text, currentCounter)} RIGHT_PARENTHESIS {compiler.popParenthesis()})
+
 ;
 
 array_brackets:
@@ -174,7 +182,8 @@ function_call:
 ;
 
 main_function:
-  MAIN {compiler.current_function=Function("void", "main", {}, {})} LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_CURLY statutes RIGHT_CURLY
+  MAIN {compiler.current_function=Function("void", "main", [], {})} LEFT_PARENTHESIS RIGHT_PARENTHESIS
+  LEFT_CURLY {compiler.fill_goto_main_quad()} statutes RIGHT_CURLY
 ;
 
 statutes:
@@ -204,11 +213,12 @@ write_function_call:
 ;
 
 void_function_call:
-  function_call SEMICOLON
+  ID {compiler.void_function($ID.text)}
+  LEFT_PARENTHESIS (logic_expresions (COMMA logic_expresions)* )? RIGHT_PARENTHESIS SEMICOLON {compiler.void_end_function()}
 ;
 
 return_statement:
-  RETURN LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS SEMICOLON
+  RETURN LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS SEMICOLON {compiler.return_end_function()}
 ;
 
 conditional_function:

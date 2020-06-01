@@ -80,8 +80,9 @@ class SemanticCube:
 	}
 
 	def check_operation(self, left_operand, right_operand, operator):
-		if self.semantic_cube[left_operand][right_operand][operator] == 0:
-			return Types.ERROR
-		else:
+		print('Operación:', left_operand, right_operand, operator)
+		try:
 			result_operator = self.semantic_cube[left_operand][right_operand][operator]
 			return result_operator
+		except KeyError:
+			return Types.ERROR

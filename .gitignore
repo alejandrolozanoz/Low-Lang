@@ -1,4 +1,6 @@
 .DS_Store
+.venv/
+.vscode/
 grammar/.antlr
 grammar/__pycache__
 semantics/__pycache__

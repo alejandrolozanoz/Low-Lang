@@ -42,26 +42,26 @@ class Compiler:
 
     def add_operator(self, operator):
         self.operators_stack.append(operator)
-        print('Operator: ', operator, self.operators_stack)
+        # print('Operator: ', operator, self.operators_stack)
 
     def add_type(self, type):
         self.types_stack.append(type)
-        print('Type: ', type, self.types_stack)
+        # print('Type: ', type, self.types_stack)
 
     def add_operand(self, operand):
         self.operands_stack.append(operand)
-        print('Operand: ', operand, self.operators_stack)
+        # print('Operand: ', operand, self.operators_stack)
 
     def left_parenthesis(self):
         self.operators_stack.append('(')
-        print('Parenthesis: (', self.operators_stack)
+        # print('Parenthesis: (', self.operators_stack)
 
     def right_parenthesis(self):
         self.operators_stack.pop()
-        print('Parenthesis: )')
+        # print('Parenthesis: )')
     
     def operation_quadruple(self):
-        print("Operation Quad Gen: ", self.operands_stack, self.operators_stack, self.types_stack)
+        # print("Operation Quad Gen: ", self.operands_stack, self.operators_stack, self.types_stack)
         right_operand = self.operands_stack.pop()
         left_operand = self.operands_stack.pop()
         operator = self.operators_stack.pop()
@@ -77,14 +77,14 @@ class Compiler:
             self.operands_stack.append("Q" + self.quadruples.length()-1)
 
     def read_quadruple(self, operand):
-        print("Read Quad Gen: ", operand, operand in self.current_function.function_type, operand in self.functions_table.functions["global"].function_type)
+        # print("Read Quad Gen: ", operand, operand in self.current_function.function_type, operand in self.functions_table.functions["global"].function_type)
         if (operand in self.current_function.function_type) or (operand in self.functions_table.functions["global"].function_type):
             self.quadruples.append("read", operand, None, self.quadruples.length())
         else:
             print('ERROR: La variable ' + str(operand) + ' no está declarada')
     
     def write_quadruple(self):
-        print("Write Quad Gen: ", self.operands_stack[len(self.operands_stack)-1])
+        # print("Write Quad Gen: ", self.operands_stack[len(self.operands_stack)-1])
         if len(self.operands_stack) == 0:
             print('ERROR: Se quiere hacer un print pero no hay operandos en el stack')
         else:
@@ -94,7 +94,7 @@ class Compiler:
 
 
     def assign_quadruple(self):
-        print("Assign Quad Gen: ", self.operators_stack[len(self.operators_stack)-1])
+        # print("Assign Quad Gen: ", self.operators_stack[len(self.operators_stack)-1])
         if self.operators_stack[len(self.operators_stack)-1] == '=':
             right_operand = self.operands_stack.pop()
             left_operand = self.operands_stack.pop()
@@ -235,7 +235,7 @@ class Compiler:
             print('ERROR: Cannot assign void function ' + operand + ' to value')
         else:
             self.operands_stack.append(operand)
-            self.addType(self.functions_table.functions[operand].function_type)
+            self.add_type(self.functions_table.functions[operand].function_type)
 
 
     def check_parameters(self, id, currentCounter):
@@ -246,7 +246,7 @@ class Compiler:
                 passed_parameter = self.operands_stack.pop()
                 passed_parameter_type = self.types_stack.pop()
                 
-                if(parameter.vartype != passed_parameter_type):
+                if (parameter.vartype != passed_parameter_type):
                     print('ERROR: Parameter ' + passed_parameter + ' of type ' + passed_parameter_type + 'cannot be matched with ' + parameter.vartype)
                 else:
                     # tenemos que asignar a memoria aqui passed_parameter con su type
@@ -260,9 +260,9 @@ class Compiler:
 
     def start_main(self):
         mainQuad = self.jumps_stack.pop()
-        print(f'main quad #: {mainQuad}')
+        # print('main quad #: {mainQuad}')
         self.quadruples.quads[mainQuad].resultTemp = self.current_function.start_quadruple
-        print(f'main quad is jumping to {self.current_function.start_quadruple}')
+        # print('main quad is jumping to ' + self.current_function.start_quadruple)
 
     def goto_function(self, id):
         self.quadruples.append('GOTO', None, None, self.functions_table.functions[id].start_quadruple)
@@ -294,3 +294,6 @@ class Compiler:
             self.quadruples.append('GOTO', None, None, '_')
         else:
             print('ERROR: No return value in function ' + self.current_function.name + 'of type ' + self.current_function.function_type)
+
+    def finish_program():
+        print("Finished program: ", self.operands_stack, self.operators_stack, self.types_stack)

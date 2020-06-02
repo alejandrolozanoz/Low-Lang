@@ -78,7 +78,7 @@ program:
   PROGRAM ID {compiler.add_function(compiler.current_function)} SEMICOLON
   variable_declaration? {compiler.goto_main()}
   functions
-  main_function
+  main_function {compiler.finish_program}
 ;
 
 variable_declaration:

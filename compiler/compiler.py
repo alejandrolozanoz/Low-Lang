@@ -6,26 +6,29 @@ from compiler.quadruples_table import QuadruplesTable
 from semantics.types import Types
 from semantics.operations import Operations
 from semantics.semantic_cube import SemanticCube
+from memory.memory import Memory
+import memory.constants
 
 class Compiler:
     def __init__(self):
         self.functions_table = FunctionsTable()
-        self.current_function = Function("void", "global", [], {})
+        self.current_function = Function("void", "global", [], {}, memory=Memory(GLOBAL_INITIAL))
         self.semantic_cube = SemanticCube()
         self.quadruples = QuadruplesTable()
         self.operators_stack = []
         self.operands_stack = []
         self.jumps_stack = []
         self.types_stack = []
-        
+
     def add_function(self, function: Function):
         self.current_function.start_quadruple = self.quadruples.length()
         self.functions_table.add_function(function)
 
     def add_variable(self, variable_name):
         if variable_name in self.current_function.function_variables:
-            self.operands_stack.append(variable_name)
-            self.add_type(self.current_function.function_variables[variable_name].variable_type)
+            variable = self.current_function.function_variables[variable_name]
+            self.operands_stack.append(variable.variable_name)
+            self.add_type(variable.variable_type)
         
         elif variable_name in self.functions_table.functions["global"].function_variables:
             self.operands_stack.append(variable_name)
@@ -261,7 +264,7 @@ class Compiler:
     def start_main(self):
         mainQuad = self.jumps_stack.pop()
         # print('main quad #: {mainQuad}')
-        self.quadruples.quads[mainQuad].resultTemp = self.current_function.start_quadruple
+        self.quadruples.quads[mainQuad].result = self.current_function.start_quadruple
         # print('main quad is jumping to ' + self.current_function.start_quadruple)
 
     def goto_function(self, id):
@@ -295,5 +298,7 @@ class Compiler:
         else:
             print('ERROR: No return value in function ' + self.current_function.name + 'of type ' + self.current_function.function_type)
 
-    def finish_program():
-        print("Finished program: ", self.operands_stack, self.operators_stack, self.types_stack)
+    def finish_program(self):
+        print("Finished program: ")
+        self.quadruples.print()
+        print(self.operands_stack, self.operators_stack, self.types_stack, self.jumps_stack)

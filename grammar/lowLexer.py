@@ -7,6 +7,9 @@ import sys
 
 from compiler.compiler import Compiler
 from compiler.function import Function
+from memory.memory import Memory
+from memory.constants import MemoryConstants
+from semantics.types import Types
 compiler = Compiler()
 
 

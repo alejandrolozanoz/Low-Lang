@@ -6,9 +6,13 @@ class QuadruplesTable:
 	    self.quads = []
 
     def append(self, operator, left_operand, right_operand, result = None):
+        print(operator, left_operand, right_operand, result)
         quadruple = Quadruple(operator, left_operand, right_operand, result)
         self.quads.append(quadruple)
-        print('Quad: ', operator, left_operand, right_operand, result)
-    
+
     def length(self):
         return len(self.quads)
+    
+    def print(self):
+        for quad in self.quads:
+            print(quad.operator, quad.left_operand, quad.right_operand, quad.result)

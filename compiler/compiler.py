@@ -7,18 +7,20 @@ from semantics.types import Types
 from semantics.operations import Operations
 from semantics.semantic_cube import SemanticCube
 from memory.memory import Memory
-import memory.constants
+from memory.constants import MemoryConstants
 
 class Compiler:
     def __init__(self):
         self.functions_table = FunctionsTable()
-        self.current_function = Function("void", "global", [], {}, memory=Memory(GLOBAL_INITIAL))
+        self.current_function = Function("void", "global", [], {}, function_memory=Memory(MemoryConstants.GLOBAL_INITIAL))
         self.semantic_cube = SemanticCube()
         self.quadruples = QuadruplesTable()
         self.operators_stack = []
         self.operands_stack = []
         self.jumps_stack = []
         self.types_stack = []
+        self.temporal_memory = Memory(MemoryConstants.TEMPORAL_INITIAL)
+        self.constant_memory = Memory(MemoryConstants.CONSTANT_INITIAL)
 
     def add_function(self, function: Function):
         self.current_function.start_quadruple = self.quadruples.length()
@@ -27,12 +29,13 @@ class Compiler:
     def add_variable(self, variable_name):
         if variable_name in self.current_function.function_variables:
             variable = self.current_function.function_variables[variable_name]
-            self.operands_stack.append(variable.variable_name)
+            self.operands_stack.append(variable.variable_address)
             self.add_type(variable.variable_type)
         
         elif variable_name in self.functions_table.functions["global"].function_variables:
-            self.operands_stack.append(variable_name)
-            self.add_type(self.functions_table.functions["global"].function_variables[variable_name].variable_type)
+            variable = self.functions_table.functions["global"].function_variables[variable_name]
+            self.operands_stack.append(variable.variable_address)
+            self.add_type(variable.variable_type)
         
         elif variable_name in self.functions_table.functions:
              if self.functions_table.functions[variable_name].function_type == 'void':
@@ -51,8 +54,12 @@ class Compiler:
         self.types_stack.append(type)
         # print('Type: ', type, self.types_stack)
 
-    def add_operand(self, operand):
-        self.operands_stack.append(operand)
+    def add_constant_operand(self, operand, type):
+        address = self.constant_memory.get_address(type)
+        constant = Variable(type, operand, operand, address)
+        # PUSH to exec CONSTANT memory
+        self.operands_stack.append(constant.variable_address)
+        self.types_stack.append(type)
         # print('Operand: ', operand, self.operators_stack)
 
     def left_parenthesis(self):
@@ -70,14 +77,15 @@ class Compiler:
         operator = self.operators_stack.pop()
         right_operand_type = self.types_stack.pop()
         left_operand_type = self.types_stack.pop()
-        result_type = SemanticCube().check_operation(left_operand_type, right_operand_type, operator) == Types().ERROR
-        if result_type:
+        result_type = SemanticCube().check_operation(left_operand_type, right_operand_type, operator)
+        if result_type == Types.ERROR:
             print('ERROR: Los tipos de datos de la operación no son compatibles.')
         else:
             # Create quadruple and add its type and and result to type and operand stacks
-            self.quadruples.append(operator, left_operand, right_operand, self.quadruples.length()+1)
+            result_address = self.temporal_memory.get_address(result_type)
+            self.quadruples.append(operator, left_operand, right_operand, result_address)
             self.types_stack.append(result_type)
-            self.operands_stack.append("Q" + self.quadruples.length()-1)
+            self.operands_stack.append(self.quadruples.length()-1)
 
     def read_quadruple(self, operand):
         # print("Read Quad Gen: ", operand, operand in self.current_function.function_type, operand in self.functions_table.functions["global"].function_type)
@@ -93,7 +101,7 @@ class Compiler:
         else:
             printed_operand = self.operands_stack.pop()
             self.types_stack.pop()
-            self.quadruples.append("print", printed_operand, None, self.quadruples.length())
+            self.quadruples.append("print", None, None, printed_operand)
 
 
     def assign_quadruple(self):
@@ -104,11 +112,10 @@ class Compiler:
             operator = self.operators_stack.pop()
             right_operand_type = self.types_stack.pop()
             left_operand_type = self.types_stack.pop()
-
-            if SemanticCube().check_operation(left_operand_type, right_operand_type, operator) == Types().ERROR:
+            result_type = SemanticCube().check_operation(left_operand_type, right_operand_type, operator)
+            if result_type == Types.ERROR:
                 print('ERROR: Los tipos de datos de la asignación no son compatibles.')
-    
-            self.quadruples.append(operator, left_operand, right_operand, self.quadruples.length())
+            self.quadruples.append(operator, right_operand, None, left_operand)
         else:
             print('ERROR: Se entró a crear quad de asignación pero no había = en el stack.', self.operators_stack)
 
@@ -119,22 +126,22 @@ class Compiler:
 
     def check_for_add_or_subs(self):
         # print("Add/Sub Check", len(self.operators_stack), self.operators_stack[-1:])
-        if len(self.operators_stack) > 0 and self.operators_stack[-1:] in [Operations.ADDITION, Operations.SUBTRACTION]:
+        if len(self.operators_stack) > 0 and self.operators_stack[len(self.operators_stack)-1] in [Operations.ADDITION, Operations.SUBTRACTION]:
             self.operation_quadruple()
 
     def check_for_relational_operators(self):
         # print("Relational Check", len(self.operators_stack), self.operators_stack[-1:])
-        if len(self.operators_stack) > 0 and self.operators_stack[-1:] in [Operations.EQUAL, Operations.NOT_EQUAL,  Operations.GREATER_OR_EQUAL, Operations.LESS_OR_EQUAL, Operations.GREATER, Operations.LESS]:
+        if len(self.operators_stack) > 0 and self.operators_stack[len(self.operators_stack)-1] in [Operations.EQUAL, Operations.NOT_EQUAL,  Operations.GREATER_OR_EQUAL, Operations.LESS_OR_EQUAL, Operations.GREATER, Operations.LESS]:
             self.operation_quadruple()
 
     def check_for_logic_operators(self):
         # print("Logic Check", len(self.operators_stack), self.operators_stack[-1:])
-        if len(self.operators_stack) > 0 and self.operators_stack[-1:] in [Operations.AND, Operations.OR]:
+        if len(self.operators_stack) > 0 and self.operators_stack[len(self.operators_stack)-1] in [Operations.AND, Operations.OR]:
             self.operation_quadruple()
 
     def check_for_assignment(self):
         # print("Asignment Check", len(self.operators_stack), self.operators_stack[-1:])
-        if len(self.operators_stack) > 0 and self.operators_stack[-1:] == Operations.ASSIGN:
+        if len(self.operators_stack) > 0 and self.operators_stack[len(self.operators_stack)-1] == Operations.ASSIGN:
             self.operation_quadruple()
 
     def if_statement(self):
@@ -142,12 +149,13 @@ class Compiler:
             # Check if while statement is valid
             conditionVar = self.operands_stack.pop()
             typeConditionVar = self.types_stack.pop()
+            print(self.operands_stack, self.operators_stack, self.types_stack, self.jumps_stack) 
             if typeConditionVar == Types.BOOL:
                 # Create GOTOF and save quad in jumps stack to fill when we know false jump location
                 self.jumps_stack.append(self.quadruples.length())
                 self.quadruples.append("GOTOF", conditionVar, None, None)
             else:
-                print('ERROR: ' + conditionVar + ' is not a boolean, its ' + typeConditionVar)
+                print('ERROR: ' + str(conditionVar)+ ' no es un boolean, es ' + str(typeConditionVar))
 
     def else_statement(self):
         # Create GOTO and save quad in jumps stack to fill when we know jump location
@@ -167,12 +175,12 @@ class Compiler:
         if len(self.operands_stack) != 0:
             conditionVar = self.operands_stack.pop()
             typeConditionVar = self.types_stack.pop()
-            if typeConditionVar == Types().Bool:
+            if typeConditionVar == Types.BOOL:
                 # Save begin statutes quad in jumps stack to fill when we know jump location
                 self.jumps_stack.append(self.quadruples.length())
                 self.quadruples.append("GOTOF", conditionVar, None, None)
             else:
-                print('ERROR: ' + conditionVar + ' is ' + typeConditionVar + ' + ' + 'insted of a boolean')
+                print('ERROR: ' + conditionVar + ' es ' + typeConditionVar + 'en vez de boolean.')
 
     def while_end(self):
         # Get while statement index to generate GOTO quad to loop in while
@@ -263,9 +271,7 @@ class Compiler:
 
     def start_main(self):
         mainQuad = self.jumps_stack.pop()
-        # print('main quad #: {mainQuad}')
-        self.quadruples.quads[mainQuad].result = self.current_function.start_quadruple
-        # print('main quad is jumping to ' + self.current_function.start_quadruple)
+        self.quadruples.quads[mainQuad].result = self.quadruples.length()
 
     def goto_function(self, id):
         self.quadruples.append('GOTO', None, None, self.functions_table.functions[id].start_quadruple)
@@ -280,7 +286,7 @@ class Compiler:
             self.current_function.end_quadruple = self.quadruples.length()
             self.quadruples.append('GOTO', None, None, '_')
         else:
-            print('ERROR: Void function ' + self.current_function.name + ' cannot have a return statement')
+            print('ERROR: Void function ' + self.current_function.function_name + ' cannot have a return statement')
 
     def void_function(self, id):
         if id in self.functions_table.functions:
@@ -301,4 +307,8 @@ class Compiler:
     def finish_program(self):
         print("Finished program: ")
         self.quadruples.print()
+<<<<<<< HEAD
         print(self.operands_stack, self.operators_stack, self.types_stack, self.jumps_stack)
+=======
+        print(self.operands_stack, self.operators_stack, self.types_stack, self.jumps_stack) 
+>>>>>>> 2459957... Begin memory implementation

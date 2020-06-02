@@ -8,7 +8,7 @@ var
 funcion int fact (int j)
 var int i;
 {
-    j = (p - j * 2);
+    j = p - j * 2;
 
     si (j == 1) entonces {
         regresa (j);

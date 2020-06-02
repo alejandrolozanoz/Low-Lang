@@ -307,8 +307,4 @@ class Compiler:
     def finish_program(self):
         print("Finished program: ")
         self.quadruples.print()
-<<<<<<< HEAD
         print(self.operands_stack, self.operators_stack, self.types_stack, self.jumps_stack)
-=======
-        print(self.operands_stack, self.operators_stack, self.types_stack, self.jumps_stack) 
->>>>>>> 2459957... Begin memory implementation

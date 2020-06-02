@@ -1,0 +1,29 @@
+programa low;
+var
+    int i;
+
+funcion void func1 (int b)
+{
+    escribe(b);
+}
+
+funcion int func2 (int c)
+var int d;
+{
+    d = c + 1;
+    regresa(d);
+}
+
+funcion int func3 (int g)
+var int l;
+{
+    l = func2(g);
+    regresa(l);
+}
+
+principal()
+{
+    i = 10;
+    func1(i); %% escribe 10
+    escribe(func3(10)); %% 11
+}

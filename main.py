@@ -18,7 +18,7 @@ def main(argv):
     if parser.getNumberOfSyntaxErrors() == 0:
       print("¡Programa Compilado Correctamente!")
     else:
-      print("Error al Compilar.")
+      print("Hay errores de sintaxis en el código.")
 
 if __name__ == '__main__':
     main(sys.argv)

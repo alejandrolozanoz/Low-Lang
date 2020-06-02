@@ -76,7 +76,7 @@ WHITESPACE : [ \t\r\n]+ -> skip ;
 
 program:
   PROGRAM ID {compiler.add_function(compiler.current_function)} SEMICOLON
-  variable_declaration
+  variable_declaration? {compiler.goto_main()}
   functions
   main_function
 ;
@@ -126,8 +126,8 @@ function_type:
 ;
 
 parameters:
-  data_type ID {compiler.current_function.update_parameters($data_type.text, $ID.text)}
-  (COMMA data_type ID {compiler.current_function.update_parameters($data_type.text, $ID.text)})*
+  {currentCounter=0} data_type ID {compiler.current_function.update_parameters($data_type.text, $ID.text)} {currentCounter += 1}
+  (COMMA data_type ID {compiler.current_function.update_parameters($data_type.text, $ID.text)} {currentCounter += 1})*
 ;
 
 logic_expresions:
@@ -162,16 +162,16 @@ expresion:
   constant |
   ID {compiler.add_variable($ID.text)} array_brackets? |
   LEFT_PARENTHESIS {compiler.left_parenthesis()} logic_expresions RIGHT_PARENTHESIS {compiler.right_parenthesis()} |
-  function_call |
-  function_parameters
+  function_call
+  // function_parameters
 ;
 
-function_parameters:
-  ID {compiler.add_function_operand_type($ID.text)} LEFT_PARENTHESIS {compiler.addParenthesis()} {currentCounter=0}
-  (multiplication_division_expresions {currentCounter += 1} (COMMA multiplication_division_expresions {currentCounter += 1}))*
-  {compiler.goto_function($ID.text)} {compiler.check_parameters($ID.text, currentCounter)} RIGHT_PARENTHESIS {compiler.popParenthesis()})
+// function_parameters:
+//   ID {compiler.add_function_operand_type($ID.text)} LEFT_PARENTHESIS {compiler.addParenthesis()} {currentCounter=0}
+//   (logic_expresions {currentCounter += 1} (COMMA logic_expresions {currentCounter += 1}))*
+//   {compiler.goto_function($ID.text)} {compiler.check_parameters($ID.text, currentCounter)} RIGHT_PARENTHESIS {compiler.popParenthesis()})
 
-;
+// ;
 
 array_brackets:
   (LEFT_BRACKET logic_expresions RIGHT_BRACKET)
@@ -183,7 +183,7 @@ function_call:
 
 main_function:
   MAIN {compiler.current_function=Function("void", "main", [], {})} LEFT_PARENTHESIS RIGHT_PARENTHESIS
-  LEFT_CURLY {compiler.fill_goto_main_quad()} statutes RIGHT_CURLY
+  LEFT_CURLY {compiler.start_main()} statutes RIGHT_CURLY
 ;
 
 statutes:

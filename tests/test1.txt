@@ -9,5 +9,8 @@ var int i;
 }
 
 principal() {
+  j=1;
+  escribe("Otros datos");
+  escribe(j);
   j=p*2;
 }

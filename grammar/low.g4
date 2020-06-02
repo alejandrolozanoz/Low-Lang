@@ -78,7 +78,7 @@ program:
   PROGRAM ID {compiler.add_function(compiler.current_function)} SEMICOLON
   variable_declaration? {compiler.goto_main()}
   functions
-  main_function {compiler.finish_program}
+  main_function
 ;
 
 variable_declaration:
@@ -183,7 +183,7 @@ function_call:
 
 main_function:
   MAIN {compiler.current_function=Function("void", "main", [], {})} LEFT_PARENTHESIS RIGHT_PARENTHESIS
-  LEFT_CURLY {compiler.start_main()} statutes RIGHT_CURLY
+  LEFT_CURLY {compiler.start_main()} statutes {compiler.finish_program()} RIGHT_CURLY
 ;
 
 statutes:

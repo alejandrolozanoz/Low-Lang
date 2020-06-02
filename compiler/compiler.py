@@ -261,7 +261,7 @@ class Compiler:
     def start_main(self):
         mainQuad = self.jumps_stack.pop()
         # print('main quad #: {mainQuad}')
-        self.quadruples.quads[mainQuad].resultTemp = self.current_function.start_quadruple
+        self.quadruples.quads[mainQuad].result = self.current_function.start_quadruple
         # print('main quad is jumping to ' + self.current_function.start_quadruple)
 
     def goto_function(self, id):
@@ -295,5 +295,8 @@ class Compiler:
         else:
             print('ERROR: No return value in function ' + self.current_function.name + 'of type ' + self.current_function.function_type)
 
-    def finish_program():
-        print("Finished program: ", self.operands_stack, self.operators_stack, self.types_stack)
+
+    def finish_program(self):
+        print("Finished program: ")
+        self.quadruples.print()
+        print(self.operands_stack, self.operators_stack, self.types_stack, self.jumps_stack) 

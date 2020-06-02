@@ -2,15 +2,9 @@ programa low;
 var
   int j, p;
 
-funcion int fact ()
-var int i;
-{
-  regresa(j);
-}
-
 principal() {
   j=1;
   escribe("Otros datos");
   escribe(j);
-  j=p*2;
+  j=p+1*2+3;
 }

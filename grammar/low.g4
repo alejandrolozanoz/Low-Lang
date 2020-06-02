@@ -5,6 +5,9 @@ grammar low;
 @header {
 from compiler.compiler import Compiler
 from compiler.function import Function
+from memory.memory import Memory
+from memory.constants import MemoryConstants
+from semantics.types import Types
 compiler = Compiler()
 }
 
@@ -103,11 +106,11 @@ data_type:
 ;
 
 constant:
-  BOOL_CONSTANT {compiler.add_operand($BOOL_CONSTANT.text)} |
-  FLOAT_CONSTANT {compiler.add_operand($FLOAT_CONSTANT.text)} |
-  INT_CONSTANT {compiler.add_operand($INT_CONSTANT.text)} |
-  CHAR_CONSTANT {compiler.add_operand($CHAR_CONSTANT.text)} |
-  STRING_CONSTANT {compiler.add_operand($STRING_CONSTANT.text)}
+  BOOL_CONSTANT {compiler.add_constant_operand($BOOL_CONSTANT.text, Types.BOOL)} |
+  FLOAT_CONSTANT {compiler.add_constant_operand($FLOAT_CONSTANT.text, Types.FLOAT)} |
+  INT_CONSTANT {compiler.add_constant_operand($INT_CONSTANT.text, Types.INT)} |
+  CHAR_CONSTANT {compiler.add_constant_operand($CHAR_CONSTANT.text, Types.CHAR)} |
+  STRING_CONSTANT {compiler.add_constant_operand($STRING_CONSTANT.text, Types.STRING)}
 ;
 
 functions:
@@ -115,7 +118,7 @@ functions:
 ;
 
 function:
-  FUNCTION function_type ID {compiler.current_function=Function($function_type.text, $ID.text, [], {})}
+  FUNCTION function_type ID {compiler.current_function=Function($function_type.text, $ID.text, [], {}, function_memory=Memory(MemoryConstants.LOCAL_INITIAL))}
   LEFT_PARENTHESIS parameters? RIGHT_PARENTHESIS
   variable_declaration? {compiler.add_function(compiler.current_function)}
   LEFT_CURLY statutes RIGHT_CURLY {compiler.end_function()}
@@ -143,19 +146,19 @@ relational_expresions:
     GREATER {compiler.add_operator($GREATER.text)} |
     GREATER_OR_EQUAL {compiler.add_operator($GREATER_OR_EQUAL.text)} |
     NOT_EQUAL {compiler.add_operator($NOT_EQUAL.text)} |
-    EQUAL {compiler.add_operator($EQUAL.text)}) addition_substraction_expresions)?
+    EQUAL {compiler.add_operator($EQUAL.text)}) addition_substraction_expresions {compiler.check_for_relational_operators()})?
 ;
 
 addition_substraction_expresions:
   multiplication_division_expresions {compiler.check_for_add_or_subs()}
   ((ADDITION {compiler.add_operator($ADDITION.text)} | SUBTRACTION {compiler.add_operator($SUBTRACTION.text)})
-  multiplication_division_expresions)*
+  multiplication_division_expresions {compiler.check_for_add_or_subs()})*
 ;
 
 multiplication_division_expresions:
   expresion {compiler.check_for_mult_or_div()}
   ((MULTIPLICATION {compiler.add_operator($MULTIPLICATION.text)} | DIVISION {compiler.add_operator($DIVISION.text)})
-  expresion)*
+  expresion {compiler.check_for_mult_or_div()})*
 ;
 
 expresion:
@@ -182,7 +185,7 @@ function_call:
 ;
 
 main_function:
-  MAIN {compiler.current_function=Function("void", "main", [], {})} LEFT_PARENTHESIS RIGHT_PARENTHESIS
+  MAIN {compiler.current_function=Function("void", "main", [], {}, function_memory=Memory(MemoryConstants.LOCAL_INITIAL))} LEFT_PARENTHESIS RIGHT_PARENTHESIS
   LEFT_CURLY {compiler.start_main()} statutes {compiler.finish_program()} RIGHT_CURLY
 ;
 
@@ -198,7 +201,7 @@ statutes:
 ;
 
 assignation: 
-  <assoc=right> ID {compiler.add_variable($ID.text)} array_brackets? ASSIGN {compiler.add_operator($ASSIGN.text)}
+  ID {compiler.add_variable($ID.text)} array_brackets? ASSIGN {compiler.add_operator($ASSIGN.text)}
   logic_expresions SEMICOLON {compiler.assign_quadruple()}
 ;
 
@@ -235,6 +238,6 @@ while_function:
 
 from_function:
   FROM ID array_brackets? ASSIGN logic_expresions {compiler.from_initialize($ID.text)} 
-  TO INT_CONSTANT {compiler.add_operand($INT_CONSTANT.text)} {compiler.from_statutes()}
+  TO INT_CONSTANT {compiler.add_constant_operand($INT_CONSTANT.text, Types.INT)} {compiler.from_statutes()}
   DO LEFT_CURLY statutes {compiler.end_from()} RIGHT_CURLY 
 ;

@@ -3,10 +3,12 @@ var bool i;
 int j;
 
 principal() {
-    si (true) entonces {
-        j = 1;
+    si (false) entonces {
+        j = 2;
+        escribe(j);
     }
     sino {
-        j = 2;
+        j = 1;
+        escribe(j);
     }
 }

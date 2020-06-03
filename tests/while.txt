@@ -3,7 +3,8 @@ var int x;
 
 principal() {
     x = 0;
-    mientras (false) hacer {
+    mientras (x < 3) hacer {
+        escribe(x);
         x = x+1;
     }
 }

@@ -15,10 +15,11 @@ def main(argv):
     # Start from the parser rule "Program"
     tree = parser.program()
     
-    if parser.getNumberOfSyntaxErrors() == 0:
-      print("¡Programa Compilado Correctamente!")
+    sintax_errors = parser.getNumberOfSyntaxErrors()
+    if sintax_errors == 0:
+      print("Programa sin errores de sintaxis")
     else:
-      print("Hay errores de sintaxis en el código.")
+      print("Hay con " + sintax_errors + "errores de sintaxis en el código.")
 
 if __name__ == '__main__':
     main(sys.argv)

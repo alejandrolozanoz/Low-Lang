@@ -1,9 +1,10 @@
 programa low;
 var
-  int j, p;
+  int p;
+  bool j;
 
 principal() {
-  p=1;
-  j=p+2;
+  p=6;
+  j = true & false;
   escribe(j);
 }

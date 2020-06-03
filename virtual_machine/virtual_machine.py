@@ -128,8 +128,8 @@ class VirtualMachine:
         self.save_value(quad.result, result)
 
     def assign(self, quad):
-         left_operand = self.find_value(quad.left_operand)
-         self.save_value(quad.result, left_operand)
+        left_operand = self.find_value(quad.left_operand)
+        self.save_value(quad.result, left_operand)
 
     def parameter_assign(self, quad):
         left_operand = self.find_value(quad.left_operand)
@@ -143,7 +143,7 @@ class VirtualMachine:
     
     def gotoF(self, quad):
         bool_test = self.find_value(quad.left_operand)
-        if bool_test == False:
+        if bool_test is False:
             self.current_index = quad.result
         else:
             self.current_index += 1

@@ -65,9 +65,9 @@ DIVISION: '/';
 
 //Constants
 STRING_CONSTANT: '"' .*? '"';
-CHAR_CONSTANT: [.];
+CHAR_CONSTANT: '\'' . '\'';
 INT_CONSTANT: [0-9]+;
-FLOAT_CONSTANT: [0-9]+.[0-9]+;
+FLOAT_CONSTANT: [0-9]+'.'[0-9]+;
 BOOL_CONSTANT: 'true' | 'false';
 ID: [_A-Za-z]([_A-Za-z0-9])*;
 

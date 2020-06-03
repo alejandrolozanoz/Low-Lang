@@ -27,7 +27,9 @@ class SemanticCube:
 				Operations.EQUAL: Types.BOOL,
 				Operations.NOT_EQUAL: Types.BOOL,		
 				Operations.GREATER: Types.BOOL,
+				Operations.GREATER_OR_EQUAL: Types.BOOL,
 				Operations.LESS: Types.BOOL,
+				Operations.LESS_OR_EQUAL: Types.BOOL,	
 			}
 		},
 		Types.FLOAT: {

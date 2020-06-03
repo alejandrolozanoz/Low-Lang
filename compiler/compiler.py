@@ -188,12 +188,12 @@ class Compiler:
                 print('ERROR: ' + condition_var + ' es ' + type_condition_var + 'en vez de boolean.')
 
     def while_end(self):
+        # Fill while statutes quad with ending of while
+        while_statutes_index = self.jumps_stack.pop()
+        self.quadruples.quads[while_statutes_index].result = self.quadruples.length() + 1
         # Get while statement index to generate GOTO quad to loop in while
         while_statement_index = self.jumps_stack.pop()
         self.quadruples.append("GOTO", None, None, while_statement_index)
-        # Fill while statutes quad with ending of while
-        while_statutes_index = self.jumps_stack.pop()
-        self.quadruples.quads[while_statutes_index].result = self.quadruples.length()
     
     def from_initialize(self, operand):
         # From variable was already declared locally or globally 

@@ -129,8 +129,8 @@ function_type:
 ;
 
 parameters:
-  {currentCounter=0} data_type ID {compiler.current_function.update_parameters($data_type.text, $ID.text)} {currentCounter += 1}
-  (COMMA data_type ID {compiler.current_function.update_parameters($data_type.text, $ID.text)} {currentCounter += 1})*
+  data_type ID {compiler.current_function.update_parameters($data_type.text, $ID.text)} 
+  (COMMA data_type ID {compiler.current_function.update_parameters($data_type.text, $ID.text)} )*
 ;
 
 logic_expresions:

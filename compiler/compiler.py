@@ -76,7 +76,7 @@ class Compiler:
         # print('Parenthesis: )')
     
     def operation_quadruple(self):
-        print("Operation Quad Gen: ", self.operands_stack, self.operators_stack, self.types_stack)
+        # print("Operation Quad Gen: ", self.operands_stack, self.operators_stack, self.types_stack)
         right_operand = self.operands_stack.pop()
         left_operand = self.operands_stack.pop()
         operator = self.operators_stack.pop()
@@ -110,9 +110,7 @@ class Compiler:
 
 
     def assign_quadruple(self):
-        # print("Assign Quad Gen: ", self.operators_stack[len(self.operators_stack)-1])
-        print("A")
-        print(self.operands_stack)
+        # print("Assign Quad Gen: ", self.operators_stack[len(self.operators_stack)-1], self.operands_stack)
         if self.operators_stack[len(self.operators_stack)-1] == '=':
             right_operand = self.operands_stack.pop()
             left_operand = self.operands_stack.pop()
@@ -124,7 +122,7 @@ class Compiler:
                 print('ERROR: Los tipos de datos de la asignación no son compatibles.')
             self.quadruples.append(operator, right_operand, None, left_operand)
         else:
-            print('ERROR: Se entró a crear quad de asignación pero no había = en el stack.', self.operators_stack)
+            print('ERROR: Se entró a crear un quad de asignación pero no está el operando = en el stack.', self.operators_stack)
 
     def check_for_mult_or_div(self):
         # print("Mult/Div Check", len(self.operators_stack), self.operators_stack[-1:])
@@ -154,15 +152,15 @@ class Compiler:
     def if_statement(self):
         if len(self.operands_stack) != 0:
             # Check if while statement is valid
-            conditionVar = self.operands_stack.pop()
-            typeConditionVar = self.types_stack.pop()
-            print(self.operands_stack, self.operators_stack, self.types_stack, self.jumps_stack) 
-            if typeConditionVar == Types.BOOL:
+            condition_var = self.operands_stack.pop()
+            type_condition_var = self.types_stack.pop()
+            # print(self.operands_stack, self.operators_stack, self.types_stack, self.jumps_stack) 
+            if type_condition_var == Types.BOOL:
                 # Create GOTOF and save quad in jumps stack to fill when we know false jump location
                 self.jumps_stack.append(self.quadruples.length())
-                self.quadruples.append("GOTOF", conditionVar, None, None)
+                self.quadruples.append("GOTOF", condition_var, None, None)
             else:
-                print('ERROR: ' + str(conditionVar)+ ' no es un boolean, es ' + str(typeConditionVar))
+                print('ERROR: ' + str(condition_var)+ ' no es un boolean, es ' + str(type_condition_var))
 
     def else_statement(self):
         self.quadruples.quads[self.jumps_stack.pop()].result = self.quadruples.length() + 1
@@ -180,14 +178,14 @@ class Compiler:
 
     def while_statutes(self):
         if len(self.operands_stack) != 0:
-            conditionVar = self.operands_stack.pop()
-            typeConditionVar = self.types_stack.pop()
-            if typeConditionVar == Types.BOOL:
+            condition_var = self.operands_stack.pop()
+            type_condition_var = self.types_stack.pop()
+            if type_condition_var == Types.BOOL:
                 # Save begin statutes quad in jumps stack to fill when we know jump location
                 self.jumps_stack.append(self.quadruples.length())
-                self.quadruples.append("GOTOF", conditionVar, None, None)
+                self.quadruples.append("GOTOF", condition_var, None, None)
             else:
-                print('ERROR: ' + conditionVar + ' es ' + typeConditionVar + 'en vez de boolean.')
+                print('ERROR: ' + condition_var + ' es ' + type_condition_var + 'en vez de boolean.')
 
     def while_end(self):
         # Get while statement index to generate GOTO quad to loop in while
@@ -239,7 +237,7 @@ class Compiler:
                 if (from_variable < from_variable_limit_value):
                     self.current_function.function_variables['from_variable'].variable_value += 1
             else:
-                print('ERROR: The expression resulting in {expResult} must be an integer')
+                print('ERROR: La expresión asignada a la variable del from debe de ser un entero')
     
     def end_from(self):
         # Get from statutes index to generate GOTO quad to loop back to from
@@ -251,27 +249,27 @@ class Compiler:
 
     def add_function_operand_type(self, operand):
         if self.functions_table.functions[operand].function_type == 'void':
-            print('ERROR: Cannot assign void function ' + operand + ' to value')
+            print('ERROR: No se le puede asignar a la función void ' + operand + ' un valor.')
         else:
             self.operands_stack.append(operand)
             self.add_type(self.functions_table.functions[operand].function_type)
 
 
     def check_parameters(self, id, currentCounter):
-        if len(self.functions_table.functions[id].parametersTable) == currentCounter:
-            # reversed FOR because the parametersTable is reversed in relation to operands_stack
+        if len(self.functions_table.functions[id].function_parameters) == currentCounter:
+            # reversed FOR because the function_parameters is reversed in relation to operands_stack
             # example: funccall(0, 1, 2) --> passed_parameter is the one we want to match with 2
-            for parameter in reversed(self.functions_table.functions[id].parametersTable):
+            for parameter in reversed(self.functions_table.functions[id].function_parameters):
                 passed_parameter = self.operands_stack.pop()
                 passed_parameter_type = self.types_stack.pop()
                 
-                if (parameter.vartype != passed_parameter_type):
-                    print('ERROR: Parameter ' + passed_parameter + ' of type ' + passed_parameter_type + 'cannot be matched with ' + parameter.vartype)
+                if (parameter.type != passed_parameter_type):
+                    print('ERROR: El parámetro ' + passed_parameter + ' de tipo ' + passed_parameter_type + 'no se puede asignar a ' + parameter.type)
                 else:
                     # tenemos que asignar a memoria aqui passed_parameter con su type
                     print("Parametros correctos")
         else:
-            print('ERROR: Number of parameters in call to function ' + id + ' does not match the amount declared')
+            print('ERROR: Número de parámetros en llamada a la función ' + id + ' no coincide con la cantidad declarada.')
 
     def goto_main(self):
         self.jumps_stack.append(0)
@@ -308,7 +306,7 @@ class Compiler:
             self.types_stack.pop()
             self.quadruples.append('RETURN', self.operands_stack.pop(), None, return_address)
         else:
-            print('ERROR: Void function ' + self.current_function.function_name + ' cannot have a return statement')
+            print('ERROR: La función void ' + self.current_function.function_name + ' no puede tener un estatuto regresa.')
 
     # def void_function(self, id):
     #     if id in self.functions_table.functions:
@@ -324,12 +322,15 @@ class Compiler:
             self.current_function.end_quadruple = self.quadruples.length()
             self.quadruples.append('GOTO', None, None, '_')
         else:
-            print('ERROR: No return value in function ' + self.current_function.name + 'of type ' + self.current_function.function_type)
+            print('ERROR: No se encontró valor de retorno en la función' + self.current_function.name + 'de tipo ' + self.current_function.function_type)
 
     def finish_program(self):
         self.quadruples.append("END", None, None, None)
-        print("Finished program: ")
+        print("Quadruplos del Programa: ")
         self.quadruples.print()
-        print(self.operands_stack, self.operators_stack, self.types_stack, self.jumps_stack)
+        print('Stack de operandos: ', self.operands_stack)
+        print('Stack de operadores: ', self.operators_stack)
+        print('Stack de tipos',  self.types_stack)
+        print('Stack de saltos', self.jumps_stack)
         vm = VirtualMachine(self.quadruples, self.constant_exec_memory)
         vm.execute()

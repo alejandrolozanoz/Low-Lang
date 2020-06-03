@@ -18,7 +18,7 @@ class Function:
             self.function_parameters.append(Variable(type, name, None, address))
             self.update_variables(type, name)
         else:
-            print("ERROR: No se puede tener más de un parámetro con el mismo nombre")
+            print("ERROR: No se puede tener más de un parámetro con el mismo nombre.")
 
     def update_variables(self, type, name ):
         if name not in self.function_variables:

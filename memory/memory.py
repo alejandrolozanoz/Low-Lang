@@ -26,5 +26,5 @@ class Memory:
             self.bool_counter += 1
             return self.start_address + self.bool_counter
         else:
-            print("ERROR finding address")
+            print("ERROR: no se encontró la dirección.")
             return -1

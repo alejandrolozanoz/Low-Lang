@@ -19,7 +19,7 @@ def main(argv):
     if sintax_errors == 0:
       print("Programa sin errores de sintaxis")
     else:
-      print("Hay con " + sintax_errors + "errores de sintaxis en el código.")
+      print("Programa compilado con " + sintax_errors + "errores de sintaxis en el código.")
 
 if __name__ == '__main__':
     main(sys.argv)

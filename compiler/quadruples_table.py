@@ -6,7 +6,7 @@ class QuadruplesTable:
 	    self.quads = []
 
     def append(self, operator, left_operand, right_operand, result = None):
-        print(operator, left_operand, right_operand, result)
+        # print(operator, left_operand, right_operand, result)
         quadruple = Quadruple(operator, left_operand, right_operand, result)
         self.quads.append(quadruple)
     

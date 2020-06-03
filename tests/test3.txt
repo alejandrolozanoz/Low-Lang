@@ -1,0 +1,9 @@
+programa low;
+var
+  int j, p;
+
+principal() {
+  p=1;
+  j=p+2;
+  escribe(j);
+}

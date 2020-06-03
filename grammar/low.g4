@@ -238,6 +238,6 @@ while_function:
 
 from_function:
   FROM ID array_brackets? ASSIGN logic_expresions {compiler.from_initialize($ID.text)} 
-  TO INT_CONSTANT {compileconstant_operand($INT_CONSTANT.text, Types.INT)} {compiler.from_statutes()}
+  TO INT_CONSTANT {compiler.add_constant_operand($INT_CONSTANT.text, Types.INT)} {compiler.from_statutes()}
   DO LEFT_CURLY statutes {compiler.end_from()} RIGHT_CURLY 
 ;

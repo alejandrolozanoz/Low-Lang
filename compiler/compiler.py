@@ -8,6 +8,8 @@ from semantics.operations import Operations
 from semantics.semantic_cube import SemanticCube
 from memory.memory import Memory
 from memory.constants import MemoryConstants
+from virtual_machine.virtual_machine import VirtualMachine
+from memory.exec_memory import ExecMemory
 
 class Compiler:
     def __init__(self):
@@ -21,6 +23,7 @@ class Compiler:
         self.types_stack = []
         self.temporal_memory = Memory(MemoryConstants.TEMPORAL_INITIAL)
         self.constant_memory = Memory(MemoryConstants.CONSTANT_INITIAL)
+        self.constant_exec_memory = ExecMemory(MemoryConstants.CONSTANT_INITIAL)
 
     def add_function(self, function: Function):
         self.current_function.start_quadruple = self.quadruples.length()
@@ -59,7 +62,7 @@ class Compiler:
     def add_constant_operand(self, operand, type):
         address = self.constant_memory.get_address(type)
         constant = Variable(type, operand, operand, address)
-        # PUSH to exec CONSTANT memory
+        self.constant_exec_memory.save_value(address, operand)
         self.operands_stack.append(constant.variable_address)
         self.types_stack.append(type)
         # print('Operand: ', operand, self.operators_stack)
@@ -324,6 +327,9 @@ class Compiler:
             print('ERROR: No return value in function ' + self.current_function.name + 'of type ' + self.current_function.function_type)
 
     def finish_program(self):
+        self.quadruples.append("END", None, None, None)
         print("Finished program: ")
         self.quadruples.print()
         print(self.operands_stack, self.operators_stack, self.types_stack, self.jumps_stack)
+        vm = VirtualMachine(self.quadruples, self.constant_exec_memory)
+        vm.execute()

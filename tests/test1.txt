@@ -6,5 +6,5 @@ principal() {
   j=1;
   escribe("Otros datos");
   escribe(j);
-  j=p+1*2+3;
+  j=p+1*2+3; 
 }

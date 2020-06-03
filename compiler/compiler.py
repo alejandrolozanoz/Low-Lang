@@ -71,7 +71,7 @@ class Compiler:
         # print('Parenthesis: )')
     
     def operation_quadruple(self):
-        # print("Operation Quad Gen: ", self.operands_stack, self.operators_stack, self.types_stack)
+        print("Operation Quad Gen: ", self.operands_stack, self.operators_stack, self.types_stack)
         right_operand = self.operands_stack.pop()
         left_operand = self.operands_stack.pop()
         operator = self.operators_stack.pop()

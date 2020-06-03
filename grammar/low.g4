@@ -136,7 +136,7 @@ parameters:
 logic_expresions:
   relational_expresions {compiler.check_for_logic_operators()}
   ((AND {compiler.add_operator($AND.text)} | OR {compiler.add_operator($OR.text)})
-  relational_expresions {compiler.check_for_logic_operators()})*
+  logic_expresions {compiler.check_for_logic_operators()})*
 ;
 
 relational_expresions:
@@ -146,19 +146,19 @@ relational_expresions:
     GREATER {compiler.add_operator($GREATER.text)} |
     GREATER_OR_EQUAL {compiler.add_operator($GREATER_OR_EQUAL.text)} |
     NOT_EQUAL {compiler.add_operator($NOT_EQUAL.text)} |
-    EQUAL {compiler.add_operator($EQUAL.text)}) addition_substraction_expresions {compiler.check_for_relational_operators()})?
+    EQUAL {compiler.add_operator($EQUAL.text)}) relational_expresions {compiler.check_for_relational_operators()})*
 ;
 
 addition_substraction_expresions:
   multiplication_division_expresions {compiler.check_for_add_or_subs()}
   ((ADDITION {compiler.add_operator($ADDITION.text)} | SUBTRACTION {compiler.add_operator($SUBTRACTION.text)})
-  multiplication_division_expresions {compiler.check_for_add_or_subs()})*
+  addition_substraction_expresions {compiler.check_for_add_or_subs()})*
 ;
 
 multiplication_division_expresions:
   expresion {compiler.check_for_mult_or_div()}
-  ((MULTIPLICATION {compiler.add_operator($MULTIPLICATION.text)} | DIVISION {compiler.add_operator($DIVISION.text)})
-  expresion {compiler.check_for_mult_or_div()})*
+  ((MULTIPLICATION {compiler.git ($MULTIPLICATION.text)} | DIVISION {compiler.add_operator($DIVISION.text)})
+  multiplication_division_expresions {compiler.check_for_mult_or_div()})*
 ;
 
 expresion:

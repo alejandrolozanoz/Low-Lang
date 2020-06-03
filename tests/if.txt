@@ -1,11 +1,12 @@
 programa low;
 var bool i;
+int j;
 
 principal() {
     si (true) entonces {
-        regresa ("Hola");
+        j = 1;
     }
     sino {
-        regresa ("Bye");
+        j = 2;
     }
 }

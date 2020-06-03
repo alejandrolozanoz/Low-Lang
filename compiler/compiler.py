@@ -25,6 +25,8 @@ class Compiler:
     def add_function(self, function: Function):
         self.current_function.start_quadruple = self.quadruples.length()
         self.functions_table.add_function(function)
+        if function.function_type != "void":
+            self.functions_table.functions["global"].update_variables(function.function_type, function.function_name)
 
     def add_variable(self, variable_name):
         if variable_name in self.current_function.function_variables:
@@ -85,7 +87,7 @@ class Compiler:
             result_address = self.temporal_memory.get_address(result_type)
             self.quadruples.append(operator, left_operand, right_operand, result_address)
             self.types_stack.append(result_type)
-            self.operands_stack.append(self.quadruples.length()-1)
+            self.operands_stack.append(result_address)
 
     def read_quadruple(self, operand):
         # print("Read Quad Gen: ", operand, operand in self.current_function.function_type, operand in self.functions_table.functions["global"].function_type)
@@ -106,6 +108,8 @@ class Compiler:
 
     def assign_quadruple(self):
         # print("Assign Quad Gen: ", self.operators_stack[len(self.operators_stack)-1])
+        print("A")
+        print(self.operands_stack)
         if self.operators_stack[len(self.operators_stack)-1] == '=':
             right_operand = self.operands_stack.pop()
             left_operand = self.operands_stack.pop()
@@ -158,14 +162,14 @@ class Compiler:
                 print('ERROR: ' + str(conditionVar)+ ' no es un boolean, es ' + str(typeConditionVar))
 
     def else_statement(self):
+        self.quadruples.quads[self.jumps_stack.pop()].result = self.quadruples.length() + 1
         # Create GOTO and save quad in jumps stack to fill when we know jump location
         self.jumps_stack.append(self.quadruples.length())
         self.quadruples.append("GOTO", None , None, None)
 
     def end_if_else_function(self):
         # Fill if's GOTOF quad with current index
-        GOTOF = self.jumps_stack.pop()
-        self.quadruples.quads[GOTOF].result = self.quadruples.length()
+        self.quadruples.quads[self.jumps_stack.pop()].result = self.quadruples.length()
 
     def while_statement(self):
         # Save while statement quad in jumps stack to fill when we know jump location
@@ -201,6 +205,7 @@ class Compiler:
 
                 # Pop variable value and save
                 from_variable_value = self.operands_stack.pop()
+                self.types_stack.pop()
                 self.current_function.function_variables['from_variable'] = Variable(Types.INT, 'from_variable', from_variable_value)
 
                 # Save from statement quad in jumps stack to fill when we know jump location
@@ -274,28 +279,42 @@ class Compiler:
         self.quadruples.quads[mainQuad].result = self.quadruples.length()
 
     def goto_function(self, id):
-        self.quadruples.append('GOTO', None, None, self.functions_table.functions[id].start_quadruple)
+        self.quadruples.append('GOSUB', None, None, self.functions_table.functions[id].start_quadruple)
+        if self.functions_table.functions[id].function_type != "void":
+            ret_type = self.functions_table.functions[id].function_type
+            ret_address = self.temporal_memory.get_address(ret_type)
+            self.quadruples.append('=', self.functions_table.functions["global"].function_variables[id].variable_address, None, ret_address)
+            self.operands_stack.append(ret_address)
+            self.types_stack.append(ret_type)
+
+    def create_era(self, function_name):
+        self.quadruples.append("ERA", None, None, function_name)
+
+    def add_param(self):
+        self.types_stack.pop()
+        self.quadruples.append("PARAM", None, None, self.operands_stack.pop())
 
     def end_function(self):
         self.current_function.end_quadruple = self.quadruples.length()
-        self.quadruples.append('GOTO', None, None, '_')
-
+        self.quadruples.append('ENDPROC', None, None, None)
 
     def return_end_function(self):
         if self.current_function.function_type != "void":
             self.current_function.end_quadruple = self.quadruples.length()
-            self.quadruples.append('GOTO', None, None, '_')
+            return_address = self.functions_table.functions["global"].function_variables[self.current_function.function_name].variable_address
+            self.types_stack.pop()
+            self.quadruples.append('RETURN', self.operands_stack.pop(), None, return_address)
         else:
             print('ERROR: Void function ' + self.current_function.function_name + ' cannot have a return statement')
 
-    def void_function(self, id):
-        if id in self.functions_table.functions:
-            if self.functions_table.functions[id].function_type != 'void':
-                print('ERROR: Function ' + id + ' return value must be assigned')
-            else:
-                print('VOID FUNCTION: Pudimos llamar void function', {id})
-        else:
-            print('ERROR: Function ' + id + ' is not declared.')
+    # def void_function(self, id):
+    #     if id in self.functions_table.functions:
+    #         if self.functions_table.functions[id].function_type != 'void':
+    #             print('ERROR: Function ' + id + ' return value must be assigned')
+    #         else:
+    #             print('VOID FUNCTION: Pudimos llamar void function', {id})
+    #     else:
+    #         print('ERROR: Function ' + id + ' is not declared.')
 
     def void_end_function(self):
         if self.current_function.function_type == "void":

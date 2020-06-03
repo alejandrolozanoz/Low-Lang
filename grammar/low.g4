@@ -98,11 +98,11 @@ declaration_array_brackets:
 ;
 
 data_type:
-  INT {compiler.add_type($INT.text)} |
-  BOOL {compiler.add_type($BOOL.text)} |
-  FLOAT {compiler.add_type($FLOAT.text)} |
-  STRING {compiler.add_type($STRING.text)} |
-  CHAR {compiler.add_type($CHAR.text)}
+  INT |
+  BOOL |
+  FLOAT |
+  STRING |
+  CHAR
 ;
 
 constant:
@@ -157,7 +157,7 @@ addition_substraction_expresions:
 
 multiplication_division_expresions:
   expresion {compiler.check_for_mult_or_div()}
-  ((MULTIPLICATION {compiler.git ($MULTIPLICATION.text)} | DIVISION {compiler.add_operator($DIVISION.text)})
+  ((MULTIPLICATION {compiler.add_operator($MULTIPLICATION.text)} | DIVISION {compiler.add_operator($DIVISION.text)})
   multiplication_division_expresions {compiler.check_for_mult_or_div()})*
 ;
 
@@ -181,7 +181,7 @@ array_brackets:
 ;
 
 function_call:
-  ID LEFT_PARENTHESIS (logic_expresions (COMMA logic_expresions)* )? RIGHT_PARENTHESIS
+  ID {compiler.create_era($ID.text)} LEFT_PARENTHESIS (logic_expresions {compiler.add_param()} (COMMA logic_expresions {compiler.add_param()} )* )? RIGHT_PARENTHESIS {compiler.goto_function($ID.text)}
 ;
 
 main_function:
@@ -216,8 +216,8 @@ write_function_call:
 ;
 
 void_function_call:
-  ID {compiler.void_function($ID.text)}
-  LEFT_PARENTHESIS (logic_expresions (COMMA logic_expresions)* )? RIGHT_PARENTHESIS SEMICOLON {compiler.void_end_function()}
+  ID {compiler.create_era($ID.text)}
+  LEFT_PARENTHESIS (logic_expresions {compiler.add_param()}(COMMA logic_expresions {compiler.add_param()})* )? RIGHT_PARENTHESIS SEMICOLON {compiler.goto_function($ID.text)}
 ;
 
 return_statement:
@@ -227,7 +227,7 @@ return_statement:
 conditional_function:
   IF LEFT_PARENTHESIS logic_expresions RIGHT_PARENTHESIS
   {compiler.if_statement()} THEN LEFT_CURLY statutes RIGHT_CURLY
-  (ELSE {compiler.else_statement()} LEFT_CURLY statutes RIGHT_CURLY {compiler.end_if_else_function()})?
+  (ELSE {compiler.else_statement()} LEFT_CURLY statutes RIGHT_CURLY)?
   {compiler.end_if_else_function()}
 ;
 
@@ -238,6 +238,6 @@ while_function:
 
 from_function:
   FROM ID array_brackets? ASSIGN logic_expresions {compiler.from_initialize($ID.text)} 
-  TO INT_CONSTANT {compiler.add_constant_operand($INT_CONSTANT.text, Types.INT)} {compiler.from_statutes()}
+  TO INT_CONSTANT {compileconstant_operand($INT_CONSTANT.text, Types.INT)} {compiler.from_statutes()}
   DO LEFT_CURLY statutes {compiler.end_from()} RIGHT_CURLY 
 ;

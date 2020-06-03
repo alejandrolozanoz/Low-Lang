@@ -14,5 +14,5 @@ class QuadruplesTable:
         return len(self.quads)
     
     def print(self):
-        for quad in self.quads:
-            print(quad.operator, quad.left_operand, quad.right_operand, quad.result)
+        for (key, quad) in enumerate(self.quads):
+            print(key, "\t", quad.operator, "\t", quad.left_operand, "\t", quad.right_operand, "\t", quad.result)

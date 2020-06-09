@@ -55,6 +55,13 @@ class VirtualMachine:
         value = self.find_value(quad.result)
         print(f"print {value}")
     
+    def read_func(self, quad):
+        variable = quad.left_operand
+        print(f"Escribe valor para {variable}: ")
+        value = input()
+        address = quad.result
+        self.save_value(address, value)
+    
     def addition(self, quad):
         left_value = self.find_value(quad.left_operand)
         right_value = self.find_value(quad.right_operand)

@@ -18,7 +18,6 @@ class VirtualMachine:
         self.local_memory_stack = [ExecMemory(MemoryConstants.LOCAL_INITIAL)]
         self.temporal_memory_stack = [ExecMemory(MemoryConstants.TEMPORAL_INITIAL)]
         self.param_memory = ExecMemory(-1)
-        self.temporal_memory_stack = [ExecMemory(MemoryConstants.TEMPORAL_INITIAL)]
         self.param_temporal_memory = ExecMemory(-1)
         self.semantic_cube = SemanticCube()
 

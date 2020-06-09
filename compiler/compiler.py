@@ -294,19 +294,10 @@ class Compiler:
     def create_era(self, function_name):
         self.quadruples.append("ERA", None, None, function_name)
 
-    def add_param(self, id):
-        for parameter in reversed(self.functions_table[id].parameters_table):
-                parameter = self.operands_stack.pop()
-                parameter_type = self.types_stack.pop()
-                if parameter in self.current_function.variables_table:
-                    parameterAddress = self.current_function.variables_table[parameter].address
-                elif parameter in self.functions_table["global"].variables_table:
-                    parameterAddress = self.functions_table["global"].variables_table[parameter].address
-                elif parameter in self.constantTable:
-                    parameterAddress = self.constantTable[parameter].address
-                else:
-                    parameterAddress = self.temporalStack[len(self.temporalStack)-1-temporalsTaken]
-            self.quadruples.append("PARAM", None, None, self.operands_stack.pop())
+    def add_param(self):
+        self.types_stack.pop()
+        self.quadruples.append("PARAM", None, None, self.operands_stack.pop())
+
 
     def end_function(self):
         self.current_function.end_quadruple = self.quadruples.length()

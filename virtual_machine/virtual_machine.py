@@ -157,11 +157,14 @@ class VirtualMachine:
     def add_array_base(self, quad):
         pass
 
-    def execute(self):    
+    def execute(self):   
         while self.current_index < self.quadruples.length():
             quad = self.quadruples.quads[self.current_index]
             if quad.operator == "print":
                 self.print_func(quad)
+                self.current_index += 1
+            elif quad.operator == "read":
+                self.read_func(quad)
                 self.current_index += 1
             elif quad.operator == "+":
                 self.addition(quad)
@@ -223,7 +226,7 @@ class VirtualMachine:
                 self.param_memory = ExecMemory(-1)
                 self.param_temporal_memory = ExecMemory(-1)
                 self.jumps_stack.append(self.current_index + 1)
-                self.current_index = quad.left_operand
+                self.current_index = quad.result
             elif quad.operator == "PARAM":
                 self.parameter_assign(quad)
                 self.current_index += 1

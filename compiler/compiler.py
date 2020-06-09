@@ -93,9 +93,11 @@ class Compiler:
             self.operands_stack.append(result_address)
 
     def read_quadruple(self, operand):
-        # print("Read Quad Gen: ", operand, operand in self.current_function.function_type, operand in self.functions_table.functions["global"].function_type)
-        if (operand in self.current_function.function_type) or (operand in self.functions_table.functions["global"].function_type):
-            self.quadruples.append("read", operand, None, self.quadruples.length())
+        result_type = self.types_stack.pop()
+        self.operands_stack.pop()
+        if (operand in self.current_function.function_variables) or (operand in self.functions_table.functions["global"].function_variables):
+            result_address = self.temporal_memory.get_address(result_type)
+            self.quadruples.append("read", operand, None, result_address)
         else:
             print('ERROR: La variable ' + str(operand) + ' no está declarada')
     
@@ -194,30 +196,28 @@ class Compiler:
         # Get while statement index to generate GOTO quad to loop in while
         while_statement_index = self.jumps_stack.pop()
         self.quadruples.append("GOTO", None, None, while_statement_index)
-    
-    def from_initialize(self, operand):
-        # From variable was already declared locally or globally 
-        if (operand in self.current_function.function_variables) or (operand in self.functions_table.functions["global"].function_variables):
-            # Check if variable is INT to procede
-            if (self.current_function.function_variables[operand].variable_type == Types.INT) or (self.functions_table.functions["global"].function_variables[operand].variable_type == Types.INT):
-                # Create 'from_function' in function table and add variable
-                self.add_function(self.current_function)
-                self.current_function = Function('void', 'from_function', [], {})
 
+    def from_initialize(self, operand):
+        var_operand = None
+        if operand in self.current_function.function_variables:
+            var_operand = self.current_function.function_variables[operand]
+        elif operand in self.functions_table.functions["global"].function_variables:
+            var_operand = self.functions_table.functions["global"].function_variables[operand]
+        # From variable was already declared locally or globally
+        if var_operand:
+            # Check if variable is INT to procede
+            if (var_operand.variable_type == Types.INT):
                 # Pop variable value and save
                 from_variable_value = self.operands_stack.pop()
                 self.types_stack.pop()
-                self.current_function.function_variables['from_variable'] = Variable(Types.INT, 'from_variable', from_variable_value)
-
-                # Save from statement quad in jumps stack to fill when we know jump location
-                self.jumps_stack.append(self.quadruples.length())
-
+                self.quadruples.append("=", from_variable_value, None, var_operand.variable_address)
+                self.current_function.function_variables['from_variable'] = Variable(Types.INT, 'from_variable', from_variable_value, var_operand.variable_address)
             else:
                 print('ERROR: La variable ' + operand + 'no es un entero')
         else:
             print('ERROR: La variable ' + operand + ' no está declarada')
 
-    def from_statutes(self):                
+    def from_statutes(self):
         if len(self.operands_stack) != 0:
 
             # Get the initial and limit values of the from loop
@@ -230,22 +230,25 @@ class Compiler:
             from_variable_limit_type = self.types_stack.pop()
 
             if from_variable_limit_type == Types.INT:
+                res_address = self.temporal_memory.get_address(Types.BOOL)
+                self.jumps_stack.append(self.quadruples.length())
+                self.quadruples.append("<", from_variable.variable_address, from_variable_limit_value, res_address)
                 # Add point to jump stack and create GOTOF
                 self.jumps_stack.append(self.quadruples.length())
-                self.quadruples.append("GOTOF", None, None, None)
-                
-                if (from_variable < from_variable_limit_value):
-                    self.current_function.function_variables['from_variable'].variable_value += 1
+                self.quadruples.append("GOTOF", res_address, None, None)
+                self.add_constant_operand("1", Types.INT)
+                self.types_stack.pop()
+                self.quadruples.append("+", from_variable.variable_address, self.operands_stack.pop(), from_variable.variable_address)
             else:
                 print('ERROR: La expresión asignada a la variable del from debe de ser un entero')
-    
+
     def end_from(self):
+        # Fill from statutes quad with ending of while
+        from_statutes_index = self.jumps_stack.pop()
+        self.quadruples.quads[from_statutes_index].result = self.quadruples.length() + 1
         # Get from statutes index to generate GOTO quad to loop back to from
         from_statement_index = self.jumps_stack.pop()
         self.quadruples.append("GOTO", None, None, from_statement_index)
-        # Fill from statutes quad with ending of while
-        from_statutes_index = self.jumps_stack.pop()
-        self.quadruples.quads[from_statutes_index].result = self.quadruples.length()
 
     def add_function_operand_type(self, operand):
         if self.functions_table.functions[operand].function_type == 'void':
@@ -291,9 +294,19 @@ class Compiler:
     def create_era(self, function_name):
         self.quadruples.append("ERA", None, None, function_name)
 
-    def add_param(self):
-        self.types_stack.pop()
-        self.quadruples.append("PARAM", None, None, self.operands_stack.pop())
+    def add_param(self, id):
+        for parameter in reversed(self.functions_table[id].parameters_table):
+                parameter = self.operands_stack.pop()
+                parameter_type = self.types_stack.pop()
+                if parameter in self.current_function.variables_table:
+                    parameterAddress = self.current_function.variables_table[parameter].address
+                elif parameter in self.functions_table["global"].variables_table:
+                    parameterAddress = self.functions_table["global"].variables_table[parameter].address
+                elif parameter in self.constantTable:
+                    parameterAddress = self.constantTable[parameter].address
+                else:
+                    parameterAddress = self.temporalStack[len(self.temporalStack)-1-temporalsTaken]
+            self.quadruples.append("PARAM", None, None, self.operands_stack.pop())
 
     def end_function(self):
         self.current_function.end_quadruple = self.quadruples.length()

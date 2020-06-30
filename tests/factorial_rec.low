@@ -1,0 +1,26 @@
+programa low;
+var
+  int n, i, fact;
+
+/* 
+  El factorial de 7 es 5040
+  El factorial de 0 es 1
+  El factorial de un negativo es error
+*/ 
+
+funcion int factorial (int n)
+var int fact;
+{
+  si (n==0) entonces {
+    regresa(1);
+  }
+  sino { 
+    regresa(n * factorial(n-1));
+  }
+} 
+
+principal() {
+  n = 8;
+  fact = factorial(8);
+  escribe(fact);
+}

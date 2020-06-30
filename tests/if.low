@@ -3,7 +3,8 @@ var bool i;
 int j;
 
 principal() {
-    si (false) entonces {
+    j = 10;
+    si (j < 11) entonces {
         j = 2;
         escribe(j);
     }

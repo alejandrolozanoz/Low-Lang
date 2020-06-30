@@ -1,0 +1,25 @@
+programa p;
+var int first, second, i, sum;
+
+%% Programa que calcula el fibonacci sequence de 10
+
+principal()
+{
+  i = 0;
+  sum = 0;
+  first = 0;
+  second = 1;
+
+  desde i=0 hasta 10 hacer {
+    si (i <= 1) entonces {
+      sum = i;
+    }
+    sino {
+      sum = first + second;
+      first = second;
+      second = sum;
+    }
+  }
+
+  escribe(sum);
+}

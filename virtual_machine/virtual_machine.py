@@ -37,16 +37,24 @@ class VirtualMachine:
 
         else:
             return self.global_memory.values[address]
-    
-    def save_value(self, address, value):
+
+    def save_value(self, address, value, param=False):
         if (address >= 30000):
             self.constant_memory.values[address] = value
+            
         elif (address >= 20000):
-            memory = self.temporal_memory_stack[len(self.temporal_memory_stack)-1]
-            memory.values[address] = value        
+            if param:
+                self.param_temporal_memory.save_value(address, value)
+            else:
+                memory = self.temporal_memory_stack[len(self.temporal_memory_stack)-1]
+                memory.values[address] = value
+
         elif (address >= 10000):
-            memory = self.local_memory_stack[len(self.local_memory_stack)-1]
-            memory.values[address] = value
+            if param:
+                self.param_memory.save_value(address, value)
+            else:
+                memory = self.local_memory_stack[len(self.local_memory_stack)-1]
+                memory.values[address] = value
         else:
             self.global_memory.values[address] = value
 
@@ -139,7 +147,7 @@ class VirtualMachine:
 
     def parameter_assign(self, quad):
         left_operand = self.find_value(quad.left_operand)
-        self.save_value(quad.result, left_operand) # here I might need to do something else to save as parameter
+        self.save_value(quad.result, left_operand, True)
 
     def return_func(self, quad):
         temporal = self.find_value(quad.left_operand)

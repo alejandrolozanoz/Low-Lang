@@ -17,10 +17,12 @@ var int d;
 funcion int func3 (int g)
 var int l;
 {
+
     si (true) entonces {
-        regresa(l);
+        regresa(func2(2));
+    } sino {
+        regresa(func2(4));
     }
-    l = func3(g);
 }
 
 principal()

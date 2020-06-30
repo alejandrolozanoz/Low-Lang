@@ -1,0 +1,14 @@
+programa low;
+var
+    int i;
+
+funcion void func1 (int b)
+{
+    escribe(b);
+}
+
+principal()
+{
+    i = 10;
+    func1(i);
+}

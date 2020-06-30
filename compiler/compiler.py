@@ -257,23 +257,6 @@ class Compiler:
             self.operands_stack.append(operand)
             self.add_type(self.functions_table.functions[operand].function_type)
 
-
-    def check_parameters(self, id, currentCounter):
-        if len(self.functions_table.functions[id].function_parameters) == currentCounter:
-            # reversed FOR because the function_parameters is reversed in relation to operands_stack
-            # example: funccall(0, 1, 2) --> passed_parameter is the one we want to match with 2
-            for parameter in reversed(self.functions_table.functions[id].function_parameters):
-                passed_parameter = self.operands_stack.pop()
-                passed_parameter_type = self.types_stack.pop()
-                
-                if (parameter.type != passed_parameter_type):
-                    print('ERROR: El parámetro ' + passed_parameter + ' de tipo ' + passed_parameter_type + 'no se puede asignar a ' + parameter.type)
-                else:
-                    # tenemos que asignar a memoria aqui passed_parameter con su type
-                    print("Parametros correctos")
-        else:
-            print('ERROR: Número de parámetros en llamada a la función ' + id + ' no coincide con la cantidad declarada.')
-
     def goto_main(self):
         self.jumps_stack.append(0)
         self.quadruples.append("GOTO", None, None, "_")
@@ -294,9 +277,11 @@ class Compiler:
     def create_era(self, function_name):
         self.quadruples.append("ERA", None, None, function_name)
 
-    def add_param(self):
-        self.types_stack.pop()
-        self.quadruples.append("PARAM", None, None, self.operands_stack.pop())
+    def add_parameters(self, function_name):
+        for parameter in reversed(self.functions_table.functions[function_name].function_parameters):
+            parameter_operand = self.operands_stack.pop()
+            self.types_stack.pop()
+            self.quadruples.append("PARAM", parameter_operand, None, self.functions_table.functions[function_name].function_variables[parameter.variable_name].variable_address)
 
 
     def end_function(self):
@@ -311,15 +296,6 @@ class Compiler:
             self.quadruples.append('RETURN', self.operands_stack.pop(), None, return_address)
         else:
             print('ERROR: La función void ' + self.current_function.function_name + ' no puede tener un estatuto regresa.')
-
-    # def void_function(self, id):
-    #     if id in self.functions_table.functions:
-    #         if self.functions_table.functions[id].function_type != 'void':
-    #             print('ERROR: Function ' + id + ' return value must be assigned')
-    #         else:
-    #             print('VOID FUNCTION: Pudimos llamar void function', {id})
-    #     else:
-    #         print('ERROR: Function ' + id + ' is not declared.')
 
     def void_end_function(self):
         if self.current_function.function_type == "void":

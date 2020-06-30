@@ -1,0 +1,26 @@
+programa low;
+var
+  int n, i, factorial;
+
+/* 
+  El factorial de 8 es 40320
+  El factorial de 0 es 1
+  El factorial de un negativo es error
+*/ 
+principal() {
+  n=4;
+  i=1;
+  factorial=1;
+  
+  si (n<0) entonces {
+      escribe("No se puede sacar el factorial de un negativo");
+  }
+  sino {
+    mientras (i < (n+1)) hacer {
+      factorial = factorial*i;
+      i = i+1;
+    }  
+  }
+
+  escribe(factorial);
+}

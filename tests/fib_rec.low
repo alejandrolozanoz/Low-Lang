@@ -1,0 +1,24 @@
+programa p;
+var
+int i;
+
+funcion int fibonacci(int o)
+{
+   si (o<0) entonces {
+      escribe("Incorrect input");
+      regresa ("Error");
+   }
+   si (o==1) entonces {
+      regresa (0);
+    }
+   si (o==2) entonces {
+      regresa (1);
+   }
+   regresa (fibonacci(o-1)+fibonacci(o-2));
+}
+
+principal()
+{
+  i = fibonacci(20);
+  escribe("Low lang on the club, fibonacci", i);
+}

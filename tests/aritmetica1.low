@@ -4,7 +4,5 @@ var
   bool j;
 
 principal() {
-  p=6;
-  j = true & false;
-  escribe(j);
+  escribe(1 + 2 * 3);
 }

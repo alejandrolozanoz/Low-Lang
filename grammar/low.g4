@@ -166,22 +166,14 @@ expresion:
   ID {compiler.add_variable($ID.text)} array_brackets? |
   LEFT_PARENTHESIS {compiler.left_parenthesis()} logic_expresions RIGHT_PARENTHESIS {compiler.right_parenthesis()} |
   function_call
-  // function_parameters
 ;
-
-// function_parameters:
-//   ID {compiler.add_function_operand_type($ID.text)} LEFT_PARENTHESIS {compiler.addParenthesis()} {currentCounter=0}
-//   (logic_expresions {currentCounter += 1} (COMMA logic_expresions {currentCounter += 1}))*
-//   {compiler.goto_function($ID.text)} {compiler.check_parameters($ID.text, currentCounter)} RIGHT_PARENTHESIS {compiler.popParenthesis()})
-
-// ;
 
 array_brackets:
   (LEFT_BRACKET logic_expresions RIGHT_BRACKET)
 ;
 
 function_call:
-  ID {compiler.create_era($ID.text)} LEFT_PARENTHESIS (logic_expresions {compiler.add_param()} (COMMA logic_expresions {compiler.add_param()} )* )? RIGHT_PARENTHESIS {compiler.goto_function($ID.text)}
+  ID {compiler.create_era($ID.text)} LEFT_PARENTHESIS {compiler.left_parenthesis()} (logic_expresions (COMMA logic_expresions)* )? {compiler.add_parameters($ID.text)} {compiler.goto_function($ID.text)} RIGHT_PARENTHESIS {compiler.right_parenthesis()}
 ;
 
 main_function:
@@ -217,7 +209,7 @@ write_function_call:
 
 void_function_call:
   ID {compiler.create_era($ID.text)}
-  LEFT_PARENTHESIS (logic_expresions {compiler.add_param()}(COMMA logic_expresions {compiler.add_param()})* )? RIGHT_PARENTHESIS SEMICOLON {compiler.goto_function($ID.text)}
+  LEFT_PARENTHESIS (logic_expresions (COMMA logic_expresions)* )? {compiler.add_parameters($ID.text)} RIGHT_PARENTHESIS SEMICOLON {compiler.goto_function($ID.text)}
 ;
 
 return_statement:

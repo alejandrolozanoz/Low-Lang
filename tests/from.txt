@@ -1,9 +1,0 @@
-programa low;
-var int x;
-
-principal() {
-    x = 0;
-    desde i=0 hasta 9 hacer {
-        regresa ("Hola");
-    }
-}

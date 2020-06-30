@@ -1,0 +1,11 @@
+programa low;
+var
+  int j, p;
+
+principal() {
+  j = 1;
+  p = 9;
+  escribe("Respuesta: ");
+  j = p * 1 + 2 - 3 / 8 * 1 + 1 - 4 / 1 * 9;
+  escribe(j);
+}
